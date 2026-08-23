@@ -1,0 +1,156 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Registration</title>
+
+    <link rel="stylesheet" href="{% static 'learning/css/style.css' %}">
+</head>
+
+<body class="auth-page">
+
+    <div class="auth-container register-container">
+
+        <div class="auth-card">
+
+            <div class="auth-header">
+                <h1>Create Student Account</h1>
+                <p>Start your personalized learning journey</p>
+            </div>
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <!-- Username -->
+                <div class="form-group">
+                    <label>Username</label>
+
+                    <input
+                        type="text"
+                        name="username"
+                        placeholder="Enter your username"
+                        required
+                    >
+                </div>
+
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label>Email</label>
+
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label>Password</label>
+
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Create a password"
+                        required
+                    >
+                </div>
+
+
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label>Confirm Password</label>
+
+                    <input
+                        type="password"
+                        name="confirm_password"
+                        placeholder="Confirm your password"
+                        required
+                    >
+                </div>
+
+
+                <!-- Education Level -->
+                <div class="form-group">
+                    <label>Education Level</label>
+
+                    <input
+                        type="text"
+                        name="education_level"
+                        placeholder="e.g. MCA, BCA, 12th Grade"
+                    >
+                </div>
+
+
+                <!-- Learning Goal -->
+                <div class="form-group">
+                    <label>Learning Goal</label>
+
+                    <input
+                        type="text"
+                        name="learning_goal"
+                        placeholder="e.g. Improve programming skills"
+                    >
+                </div>
+
+
+                <!-- Learning Style -->
+                <div class="form-group">
+                    <label>Preferred Learning Style</label>
+
+                    <select name="preferred_learning_style">
+
+                        <option value="">Select your learning style</option>
+
+                        <option value="Visual">
+                            Visual
+                        </option>
+
+                        <option value="Reading">
+                            Reading
+                        </option>
+
+                        <option value="Practice">
+                            Practice
+                        </option>
+
+                        <option value="Mixed">
+                            Mixed
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <button type="submit" class="auth-button">
+                    Create Account
+                </button>
+
+            </form>
+
+
+            <div class="auth-footer">
+
+                <p>
+                    Already have an account?
+                    <a href="{% url 'login' %}">Login</a>
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

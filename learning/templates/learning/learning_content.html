@@ -1,0 +1,207 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ topic.name }} | Learning Content</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'learning/css/style.css' %}"
+    >
+
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+
+                <h2>AI Learning</h2>
+
+                <p>Personalized Learning System</p>
+
+            </div>
+
+            <nav>
+
+                <a href="{% url 'dashboard' %}">
+                    Dashboard
+                </a>
+
+                <a href="{% url 'subjects' %}" class="active">
+                    Subjects
+                </a>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <a href="{% url 'logout' %}" class="logout-btn">
+                    Logout
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- MAIN CONTENT -->
+
+        <main class="main-content">
+
+            <div class="top-header">
+
+                <div>
+
+                    <h1>{{ topic.name }}</h1>
+
+                    <p>
+                        Learning materials for this topic.
+                    </p>
+
+                </div>
+
+                <div class="user-info">
+                    {{ request.user.username }}
+                </div>
+
+            </div>
+
+
+            <section class="subjects-section">
+
+                <div class="section-heading">
+
+                    <h2>Learning Content</h2>
+
+                    <p>
+                        Study the available materials below.
+                    </p>
+
+                </div>
+
+
+                {% if contents %}
+
+                    <div class="subjects-grid">
+
+                        {% for content in contents %}
+
+                            <div class="subject-card">
+
+                                <h2>
+                                    {{ content.title }}
+                                </h2>
+
+                                <p>
+                                    {{ content.description }}
+                                </p>
+
+                                <p>
+                                    <strong>Type:</strong>
+                                    {{ content.get_content_type_display }}
+                                </p>
+
+                                <p>
+                                    <strong>Difficulty:</strong>
+                                    {{ content.difficulty }}
+                                </p>
+
+
+                                {% if content.content_type == 'video' and content.content_file %}
+
+    <a
+        href="{{ content.content_file.url }}"
+        target="_blank"
+        class="subject-button"
+    >
+        ▶ Watch Video
+    </a>
+
+{% elif content.content_type == 'pdf' and content.content_file %}
+
+    <a
+        href="{{ content.content_file.url }}"
+        target="_blank"
+        class="subject-button"
+    >
+        📄 Open PDF
+    </a>
+
+{% elif content.content_type == 'article' and content.content_file %}
+
+    <a
+        href="{{ content.content_file.url }}"
+        target="_blank"
+        class="subject-button"
+    >
+        📖 Read Article
+    </a>
+   
+{% endif %}
+<br>
+ <a
+    href="{% url 'generate_ai_notes' content.id %}"
+    class="subject-button"
+>
+    🤖 Generate AI Study Notes
+</a>
+<a
+    href="{% url 'generate_ai_quiz' content.id %}"
+    class="back-button"
+>
+    🧠 Generate AI Quiz
+</a>
+<a href="{% url 'whisper_test' content.id %}">
+    <button type="button">Transcribe Video</button>
+</a>
+
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-message">
+
+                        <p>
+                            No learning content is available
+                            for this topic yet.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+
+                <a
+                    href="{% url 'topics' topic.subject.id %}"
+                    class="back-button"
+                >
+                    ← Back to Topics
+                </a>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

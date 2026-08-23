@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Django
+*.log
+staticfiles/
+
+# Uploaded media (videos, PDFs, etc.)
+media/
+
+# Local SQLite database
+db.sqlite3
+
+# Temporary/test audio files
+*.wav
+
+# Environment/secrets
+.env
+
+# AI/ML model files
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
+# Hugging Face / model caches
+.cache/
+huggingface/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

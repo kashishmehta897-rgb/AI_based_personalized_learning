@@ -1,0 +1,28 @@
+from faster_whisper import WhisperModel
+
+video_path = r"D:\AI_Personalized_Learning\media\videos\6100l-lecture-1-version-2_360p_16_9.mp4"
+
+print("Loading Whisper model...")
+
+model = WhisperModel(
+    "base",
+    device="cpu",
+    compute_type="int8"
+)
+
+print("Transcribing video...")
+
+segments, info = model.transcribe(
+    video_path,
+    beam_size=5
+)
+
+print("\n--- TRANSCRIPT ---\n")
+
+for segment in segments:
+    print(
+        f"[{segment.start:.2f}s - {segment.end:.2f}s] "
+        f"{segment.text}"
+    )
+
+print("\n--- TRANSCRIPTION COMPLETE ---")

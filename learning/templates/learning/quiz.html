@@ -1,0 +1,204 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Quiz | {{ content.title }}</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'learning/css/style.css' %}"
+    >
+
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <h2>AI Learning</h2>
+
+            <p>Personalized Learning System</p>
+
+        </div>
+
+        <nav>
+
+            <a href="{% url 'dashboard' %}">
+                Dashboard
+            </a>
+
+            <a href="{% url 'subjects' %}" class="active">
+                Subjects
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a href="{% url 'logout' %}" class="logout-btn">
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <div class="top-header">
+
+            <div>
+
+                <h1>🤖 AI Generated Quiz</h1>
+
+                <p>
+                    Test your understanding of {{ content.title }}.
+                </p>
+
+            </div>
+
+            <div class="user-info">
+                {{ request.user.username }}
+            </div>
+
+        </div>
+
+
+        <section class="subjects-section">
+
+            <div class="section-heading">
+
+                <h2>{{ quiz.title }}</h2>
+
+                <p>
+                    Topic: {{ content.topic.name }}
+                </p>
+
+            </div>
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {% for question in quiz.questions.all %}
+
+                    <div class="subject-card">
+
+                        <h3>
+                            Question {{ forloop.counter }}
+                        </h3>
+
+                        <p>
+                            <strong>
+                                {{ question.question_text }}
+                            </strong>
+                        </p>
+
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="A"
+                                required
+                            >
+
+                            A. {{ question.option_a }}
+
+                        </label>
+
+                        <br><br>
+
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="B"
+                            >
+
+                            B. {{ question.option_b }}
+
+                        </label>
+
+                        <br><br>
+
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="C"
+                            >
+
+                            C. {{ question.option_c }}
+
+                        </label>
+
+                        <br><br>
+
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="D"
+                            >
+
+                            D. {{ question.option_d }}
+
+                        </label>
+
+                    </div>
+
+                    <br>
+
+                {% endfor %}
+
+
+                <button
+                    type="submit"
+                    class="back-button"
+                >
+                    Submit Quiz
+                </button>
+
+            </form>
+
+
+            <br>
+
+
+            <a
+                href="{% url 'learning_content' content.topic.id %}"
+                class="back-button"
+            >
+                ← Back to Learning Content
+            </a>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+
+</html>
