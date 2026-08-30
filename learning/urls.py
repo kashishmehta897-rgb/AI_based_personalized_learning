@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('register/', views.register, name='register'),
@@ -17,5 +18,18 @@ urlpatterns = [
     'content/<int:content_id>/transcribe/',
     views.whisper_test,
     name='whisper_test'
+),
+ # AI Quiz
+    path(
+        'content/<int:content_id>/quiz/',
+        views.generate_ai_quiz,
+        name='generate_ai_quiz'
+    ),
+
+   
+path(
+    "quiz/<int:quiz_id>/submit/",
+    views.submit_quiz,
+    name="submit_quiz"
 ),
 ]

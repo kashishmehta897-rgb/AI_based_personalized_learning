@@ -99,7 +99,7 @@
 
                         {% for content in contents %}
 
-                            <div class="subject-card">
+                            <div class="subject-card content-card">
 
                                 <h2>
                                     {{ content.title }}
@@ -120,18 +120,31 @@
                                 </p>
 
 
-                                {% if content.content_type == 'video' and content.content_file %}
+                               {% if content.content_type == 'video' and content.content_file %}
 
-    <a
-        href="{{ content.content_file.url }}"
-        target="_blank"
-        class="subject-button"
+    <div
+        id="video-{{ content.id }}"
+        class="video-container"
     >
-        ▶ Watch Video
-    </a>
+
+        <video
+            id="video-player-{{ content.id }}"
+            controls
+            preload="metadata"
+            width="100%"
+        >
+            <source
+                src="{{ content.content_file.url }}"
+                type="video/mp4"
+            >
+
+            Your browser does not support the video element.
+
+        </video>
+
+    </div>
 
 {% elif content.content_type == 'pdf' and content.content_file %}
-
     <a
         href="{{ content.content_file.url }}"
         target="_blank"
@@ -152,21 +165,25 @@
    
 {% endif %}
 <br>
- <a
-    href="{% url 'generate_ai_notes' content.id %}"
-    class="subject-button"
->
-    🤖 Generate AI Study Notes
-</a>
-<a
-    href="{% url 'generate_ai_quiz' content.id %}"
-    class="back-button"
->
-    🧠 Generate AI Quiz
-</a>
-<a href="{% url 'whisper_test' content.id %}">
-    <button type="button">Transcribe Video</button>
-</a>
+
+
+<div class="content-actions">
+
+    <a 
+        href="{% url 'generate_ai_notes' content.id %}" 
+        class="notes-button"
+    >
+        🤖 Generate AI Study Notes
+    </a>
+
+    <a 
+        href="{% url 'generate_ai_quiz' content.id %}" 
+        class="quiz-button"
+    >
+        🧠 Generate AI Quiz
+    </a>
+
+</div>
 
 
                             </div>
@@ -201,6 +218,113 @@
         </main>
 
     </div>
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const params = new URLSearchParams(
+        window.location.search
+    );
+
+    const startTime = parseFloat(
+        params.get("start")
+    );
+
+    const endTime = parseFloat(
+        params.get("end")
+    );
+
+    const contentId = params.get(
+        "content"
+    );
+
+    if (
+        isNaN(startTime) ||
+        !contentId
+    ) {
+        return;
+    }
+
+    const video = document.getElementById(
+        "video-player-" + contentId
+    );
+
+    if (!video) {
+        return;
+    }
+
+    /*
+     * Wait until video metadata is loaded.
+     */
+
+    video.addEventListener(
+        "loadedmetadata",
+        function () {
+
+            video.currentTime = startTime;
+
+            video.play().catch(
+                function (error) {
+                    console.log(
+                        "Autoplay blocked:",
+                        error
+                    );
+                }
+            );
+
+        },
+        { once: true }
+    );
+
+    /*
+     * If metadata is already loaded,
+     * seek immediately.
+     */
+
+    if (video.readyState >= 1) {
+
+        video.currentTime = startTime;
+
+        video.play().catch(
+            function (error) {
+                console.log(
+                    "Autoplay blocked:",
+                    error
+                );
+            }
+        );
+
+    }
+
+    /*
+     * Stop playback when the recommended
+     * video segment ends.
+     */
+
+    if (!isNaN(endTime)) {
+
+        video.addEventListener(
+            "timeupdate",
+            function () {
+
+                if (
+                    video.currentTime >= endTime
+                ) {
+
+                    video.pause();
+
+                    video.currentTime = startTime;
+
+                }
+
+            }
+        );
+
+    }
+
+});
+
+</script>
 
 </body>
 

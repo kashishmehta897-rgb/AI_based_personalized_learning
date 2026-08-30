@@ -374,3 +374,13 @@ Hindi detected with probability 1.0 ✅
 Next change: automatic MP4 → WAV → transcription → Gemma 3 4B notes from the existing Generate Notes button.
 
 We won't change anything before taking the backup. 👍
+
+
+23/2
+
+Tomorrow we'll follow this order:
+
+Backup first — Git + PostgreSQL.
+Fix the quiz JSON error.
+Test quiz generation again.
+Then continue with the automatic MP4 → FFmpeg → WAV → transcription → Gemma notes pipeline.

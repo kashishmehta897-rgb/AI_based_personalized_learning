@@ -1,0 +1,501 @@
+[1mdiff --git a/learning/models.py b/learning/models.py[m
+[1mindex 959446f..a05e449 100644[m
+[1m--- a/learning/models.py[m
+[1m+++ b/learning/models.py[m
+[36m@@ -56,9 +56,11 @@[m [mclass LearningContent(models.Model):[m
+     )[m
+     content_file = models.FileField([m
+     upload_to='content/',[m
+[32m+[m[32m    max_length=255,[m
+     blank=True,[m
+     null=True[m
+ [m
+[32m+[m
+ )[m
+     difficulty = models.CharField(max_length=50, default='Beginner')[m
+     created_at = models.DateTimeField(auto_now_add=True)[m
+[1mdiff --git a/learning/templates/learning/learning_content.html b/learning/templates/learning/learning_content.html[m
+[1mindex 48d29db..8cccd71 100644[m
+[1m--- a/learning/templates/learning/learning_content.html[m
+[1m+++ b/learning/templates/learning/learning_content.html[m
+[36m@@ -164,9 +164,7 @@[m
+ >[m
+     🧠 Generate AI Quiz[m
+ </a>[m
+[31m-<a href="{% url 'whisper_test' content.id %}">[m
+[31m-    <button type="button">Transcribe Video</button>[m
+[31m-</a>[m
+[32m+[m
+ [m
+ [m
+                             </div>[m
+[1mdiff --git a/learning/views.py b/learning/views.py[m
+[1mindex b7bc3d3..bf79185 100644[m
+[1m--- a/learning/views.py[m
+[1m+++ b/learning/views.py[m
+[36m@@ -16,6 +16,7 @@[m [mfrom .models import ([m
+     Quiz,[m
+     Question[m
+ )[m
+[32m+[m[32mimport fitz[m
+ [m
+ import os[m
+ [m
+[36m@@ -208,7 +209,7 @@[m [mUse simple language.[m
+             'ai_response': ai_response[m
+         }[m
+     )[m
+[31m-@login_required[m
+[32m+[m
+ @login_required[m
+ def generate_ai_notes(request, content_id):[m
+ [m
+[36m@@ -230,53 +231,172 @@[m [mdef generate_ai_notes(request, content_id):[m
+         )[m
+ [m
+     # -------------------------------------------------[m
+[31m-    # STEP 2: If transcript does not exist,[m
+[31m-    # automatically transcribe the video[m
+[32m+[m[32m    # STEP 2: Get source text[m
+[32m+[m[32m    #[m
+[32m+[m[32m    # VIDEO → Faster-Whisper → transcript[m
+[32m+[m[32m    # PDF   → PyMuPDF → extracted text[m
+     # -------------------------------------------------[m
+ [m
+[31m-    if not content.transcript:[m
+[32m+[m[32m    source_text = ""[m
+[32m+[m
+[32m+[m[32m    # =================================================[m
+[32m+[m[32m    # VIDEO[m
+[32m+[m[32m    # =================================================[m
+[32m+[m
+[32m+[m[32m    if content.content_type == "video":[m
+[32m+[m
+[32m+[m[32m        # If transcript does not exist, automatically[m
+[32m+[m[32m        # transcribe the video[m
+[32m+[m[32m        if not content.transcript:[m
+[32m+[m
+[32m+[m[32m            try:[m
+[32m+[m[32m                # Get uploaded video path[m
+[32m+[m[32m                video_path = content.content_file.path[m
+[32m+[m
+[32m+[m[32m                # Run Faster-Whisper automatically[m
+[32m+[m[32m                transcript = transcribe_video(video_path)[m
+[32m+[m
+[32m+[m[32m                # Make sure transcription produced text[m
+[32m+[m[32m                if not transcript.strip():[m
+[32m+[m[32m                    return render([m
+[32m+[m[32m                        request,[m
+[32m+[m[32m                        'learning/ai_notes.html',[m
+[32m+[m[32m                        {[m
+[32m+[m[32m                            'content': content,[m
+[32m+[m[32m                            'ai_notes': ([m
+[32m+[m[32m                                'Transcription completed, but no speech '[m
+[32m+[m[32m                                'was detected in the video.'[m
+[32m+[m[32m                            ),[m
+[32m+[m[32m                            'from_database': False[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    )[m
+[32m+[m
+[32m+[m[32m                # Save transcript to PostgreSQL[m
+[32m+[m[32m                content.transcript = transcript[m
+[32m+[m
+[32m+[m[32m                content.save([m
+[32m+[m[32m                    update_fields=['transcript'][m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m            except Exception as e:[m
+[32m+[m
+[32m+[m[32m                return render([m
+[32m+[m[32m                    request,[m
+[32m+[m[32m                    'learning/ai_notes.html',[m
+[32m+[m[32m                    {[m
+[32m+[m[32m                        'content': content,[m
+[32m+[m[32m                        'ai_notes': ([m
+[32m+[m[32m                            'Video transcription failed.\n\n'[m
+[32m+[m[32m                            f'Error: {e}'[m
+[32m+[m[32m                        ),[m
+[32m+[m[32m                        'from_database': False[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m        # Use saved transcript[m
+[32m+[m[32m        source_text = content.transcript[m
+[32m+[m
+[32m+[m[32m    # =================================================[m
+[32m+[m[32m    # PDF[m
+[32m+[m[32m    # =================================================[m
+[32m+[m
+[32m+[m[32m    elif content.content_type == "pdf":[m
+[32m+[m
+[32m+[m[32m        try:[m
+[32m+[m[32m            # Get uploaded PDF path[m
+[32m+[m[32m            pdf_path = content.content_file.path[m
+[32m+[m
+[32m+[m[32m            # Open PDF[m
+[32m+[m[32m            pdf_document = fitz.open(pdf_path)[m
+[32m+[m
+[32m+[m[32m            extracted_text = ""[m
+[32m+[m
+[32m+[m[32m            # Extract text from every page[m
+[32m+[m[32m            for page in pdf_document:[m
+[32m+[m[32m                extracted_text += page.get_text()[m
+[32m+[m
+[32m+[m[32m            pdf_document.close()[m
+[32m+[m
+[32m+[m[32m            # Remove unnecessary whitespace[m
+[32m+[m[32m            source_text = extracted_text.strip()[m
+[32m+[m
+[32m+[m[32m            # Check whether PDF actually contains text[m
+[32m+[m[32m            if not source_text:[m
+[32m+[m[32m                return render([m
+[32m+[m[32m                    request,[m
+[32m+[m[32m                    'learning/ai_notes.html',[m
+[32m+[m[32m                    {[m
+[32m+[m[32m                        'content': content,[m
+[32m+[m[32m                        'ai_notes': ([m
+[32m+[m[32m                            'No readable text was found in this PDF. '[m
+[32m+[m[32m                            'This may be a scanned/image-based PDF.'[m
+[32m+[m[32m                        ),[m
+[32m+[m[32m                        'from_database': False[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m        except Exception as e:[m
+ [m
+[31m-        if content.content_type != "video":[m
+             return render([m
+                 request,[m
+                 'learning/ai_notes.html',[m
+                 {[m
+                     'content': content,[m
+                     'ai_notes': ([m
+[31m-                        'This content is not a video and '[m
+[31m-                        'does not have a transcript.'[m
+[32m+[m[32m                        'PDF text extraction failed.\n\n'[m
+[32m+[m[32m                        f'Error: {e}'[m
+                     ),[m
+                     'from_database': False[m
+                 }[m
+             )[m
+ [m
+[32m+[m[32m    # =================================================[m
+[32m+[m[32m    # ARTICLE[m
+[32m+[m[32m    # =================================================[m
+[32m+[m
+[32m+[m[32m    elif content.content_type == "article":[m
+[32m+[m
+         try:[m
+[31m-            # Get uploaded video path[m
+[31m-            video_path = content.content_file.path[m
+[32m+[m[32m            # Get uploaded text file path[m
+[32m+[m[32m            article_path = content.content_file.path[m
+ [m
+[31m-            # Run Faster-Whisper automatically[m
+[31m-            transcript = transcribe_video(video_path)[m
+[32m+[m[32m            # Read the article text[m
+[32m+[m[32m            with open([m
+[32m+[m[32m                article_path,[m
+[32m+[m[32m                "r",[m
+[32m+[m[32m                encoding="utf-8"[m
+[32m+[m[32m            ) as file:[m
+[32m+[m
+[32m+[m[32m                source_text = file.read().strip()[m
+[32m+[m
+[32m+[m[32m            # Check whether article contains text[m
+[32m+[m[32m            if not source_text:[m
+ [m
+[31m-            # Make sure transcription produced text[m
+[31m-            if not transcript.strip():[m
+                 return render([m
+                     request,[m
+                     'learning/ai_notes.html',[m
+                     {[m
+                         'content': content,[m
+                         'ai_notes': ([m
+[31m-                            'Transcription completed, but no speech '[m
+[31m-                            'was detected in the video.'[m
+[32m+[m[32m                            'The article text file is empty.'[m
+                         ),[m
+                         'from_database': False[m
+                     }[m
+                 )[m
+ [m
+[31m-            # Save transcript to PostgreSQL[m
+[31m-            content.transcript = transcript[m
+[32m+[m[32m        except UnicodeDecodeError:[m
+ [m
+[31m-            content.save([m
+[31m-                update_fields=['transcript'][m
+[32m+[m[32m            return render([m
+[32m+[m[32m                request,[m
+[32m+[m[32m                'learning/ai_notes.html',[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    'content': content,[m
+[32m+[m[32m                    'ai_notes': ([m
+[32m+[m[32m                        'The article file could not be read as '[m
+[32m+[m[32m                        'UTF-8 text.'[m
+[32m+[m[32m                    ),[m
+[32m+[m[32m                    'from_database': False[m
+[32m+[m[32m                }[m
+             )[m
+ [m
+         except Exception as e:[m
+[36m@@ -287,70 +407,123 @@[m [mdef generate_ai_notes(request, content_id):[m
+                 {[m
+                     'content': content,[m
+                     'ai_notes': ([m
+[31m-                        'Video transcription failed.\n\n'[m
+[32m+[m[32m                        'Article text extraction failed.\n\n'[m
+                         f'Error: {e}'[m
+                     ),[m
+                     'from_database': False[m
+                 }[m
+             )[m
+ [m
+[32m+[m[32m    # =================================================[m
+[32m+[m[32m    # OTHER CONTENT TYPES[m
+[32m+[m[32m    # =================================================[m
+[32m+[m
+[32m+[m[32m    elif content.content_type not in ["video", "pdf", "article"]:[m
+[32m+[m
+[32m+[m[32m        return render([m
+[32m+[m[32m            request,[m
+[32m+[m[32m            'learning/ai_notes.html',[m
+[32m+[m[32m            {[m
+[32m+[m[32m                'content': content,[m
+[32m+[m[32m                'ai_notes': ([m
+[32m+[m[32m                    'AI study notes are currently supported '[m
+[32m+[m[32m                    'for video, PDF, and Article content.'[m
+[32m+[m[32m                ),[m
+[32m+[m[32m                'from_database': False[m
+[32m+[m[32m            }[m
+[32m+[m[32m        )[m
+[32m+[m[32m    # =================================================[m
+[32m+[m[32m    # OTHER CONTENT TYPES[m
+[32m+[m[32m    # =================================================[m
+[32m+[m
+[32m+[m[32m    else:[m
+[32m+[m
+[32m+[m[32m        return render([m
+[32m+[m[32m            request,[m
+[32m+[m[32m            'learning/ai_notes.html',[m
+[32m+[m[32m            {[m
+[32m+[m[32m                'content': content,[m
+[32m+[m[32m                'ai_notes': ([m
+[32m+[m[32m                    'AI study notes are currently supported '[m
+[32m+[m[32m                    'for video and PDF content.'[m
+[32m+[m[32m                ),[m
+[32m+[m[32m                'from_database': False[m
+[32m+[m[32m            }[m
+[32m+[m[32m        )[m
+[32m+[m
+     # -------------------------------------------------[m
+[31m-    # STEP 3: Transcript now exists[m
+[31m-    # Send transcript to Gemma 3 4B[m
+[32m+[m[32m    # STEP 3: Make sure source text exists[m
+[32m+[m[32m    # -------------------------------------------------[m
+[32m+[m
+[32m+[m[32m    if not source_text.strip():[m
+[32m+[m
+[32m+[m[32m        return render([m
+[32m+[m[32m            request,[m
+[32m+[m[32m            'learning/ai_notes.html',[m
+[32m+[m[32m            {[m
+[32m+[m[32m                'content': content,[m
+[32m+[m[32m                'ai_notes': 'No readable content was found.',[m
+[32m+[m[32m                'from_database': False[m
+[32m+[m[32m            }[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    # -------------------------------------------------[m
+[32m+[m[32m    # STEP 4: Send source content to Gemma 3 4B[m
+     # -------------------------------------------------[m
+ [m
+     prompt = f"""[m
+ You are an AI study-note generator.[m
+ [m
+[31m-Your task is to create study notes based ONLY on the transcript[m
+[31m-provided below.[m
+[32m+[m[32mYour task is to create study notes based ONLY on the source[m
+[32m+[m[32mcontent provided below.[m
+ [m
+ STRICT RULES:[m
+ [m
+[31m-1. Use ONLY information contained in the transcript.[m
+[32m+[m[32m1. Use ONLY information contained in the source content.[m
+ 2. Do NOT use your own prior knowledge.[m
+[31m-3. Do NOT add information that is not present in the transcript.[m
+[32m+[m[32m3. Do NOT add information that is not present in the source.[m
+ 4. Do NOT invent examples.[m
+[31m-5. Do NOT invent Python code.[m
+[31m-6. Do NOT add concepts that the speaker did not discuss.[m
+[31m-7. Do NOT add facts from outside the transcript.[m
+[31m-8. If something is unclear or missing from the transcript, do not[m
+[32m+[m[32m5. Do NOT invent facts.[m
+[32m+[m[32m6. Do NOT add concepts that are not discussed in the source.[m
+[32m+[m[32m7. Do NOT add facts from outside the source.[m
+[32m+[m[32m8. If something is unclear or missing from the source, do not[m
+    guess or complete it using your own knowledge.[m
+[31m-9. Translate the information into clear English if the transcript[m
+[32m+[m[32m9. Translate the information into clear English if the source[m
+    is in another language.[m
+[31m-10. Keep the meaning of the original transcript.[m
+[31m-11. The notes must represent what was actually said in the video.[m
+[32m+[m[32m10. Keep the meaning of the original source.[m
+[32m+[m[32m11. The notes must represent only the information actually[m
+[32m+[m[32m    present in the source.[m
+ [m
+ Create the notes using this structure:[m
+ [m
+ 1. Introduction[m
+ 2. Important Concepts[m
+ 3. Key Points[m
+[31m-4. Examples Mentioned in the Video[m
+[32m+[m[32m4. Examples Mentioned in the Source[m
+ 5. Summary[m
+ [m
+ IMPORTANT:[m
+ [m
+[31m-The "Examples Mentioned in the Video" section must contain ONLY[m
+[31m-examples that actually appear in the transcript.[m
+[32m+[m[32mThe "Examples Mentioned in the Source" section must contain ONLY[m
+[32m+[m[32mexamples that actually appear in the source.[m
+ [m
+[31m-TRANSCRIPT:[m
+[32m+[m[32mSOURCE CONTENT:[m
+ [m
+ --------------------[m
+[31m-{content.transcript}[m
+[32m+[m[32m{source_text}[m
+ --------------------[m
+ [m
+ Generate the final study notes now.[m
+ """[m
+ [m
+     # -------------------------------------------------[m
+[31m-    # STEP 4: Generate notes using Gemma 3 4B[m
+[32m+[m[32m    # STEP 5: Generate notes using Gemma 3 4B[m
+     # -------------------------------------------------[m
+ [m
+     ai_notes = ask_ollama(prompt)[m
+ [m
+     # -------------------------------------------------[m
+[31m-    # STEP 5: Check for Ollama error[m
+[32m+[m[32m    # STEP 6: Check for Ollama error[m
+     # -------------------------------------------------[m
+ [m
+     if ai_notes.startswith("Ollama error:"):[m
+[36m@@ -365,7 +538,7 @@[m [mGenerate the final study notes now.[m
+         )[m
+ [m
+     # -------------------------------------------------[m
+[31m-    # STEP 6: Save AI notes to PostgreSQL[m
+[32m+[m[32m    # STEP 7: Save AI notes to PostgreSQL[m
+     # -------------------------------------------------[m
+ [m
+     content.ai_notes = ai_notes[m
+[36m@@ -379,7 +552,7 @@[m [mGenerate the final study notes now.[m
+     )[m
+ [m
+     # -------------------------------------------------[m
+[31m-    # STEP 7: Display newly generated notes[m
+[32m+[m[32m    # STEP 8: Display newly generated notes[m
+     # -------------------------------------------------[m
+ [m
+     return render([m
+[36m@@ -391,23 +564,70 @@[m [mGenerate the final study notes now.[m
+             'from_database': False[m
+         }[m
+     )[m
+[32m+[m
+ def transcribe_video(video_path):[m
+[32m+[m[32m    import subprocess[m
+[32m+[m[32m    import tempfile[m
+ [m
+[31m-    segments, info = whisper_model.transcribe([m
+[31m-        video_path,[m
+[31m-        beam_size=1,[m
+[31m-        vad_filter=True[m
+[32m+[m[32m    ffmpeg_path = ([m
+[32m+[m[32m        r"C:\Users\LENOVO\AppData\Local\Microsoft\WinGet\Packages"[m
+[32m+[m[32m        r"\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe"[m
+[32m+[m[32m        r"\ffmpeg-9.0-full_build\bin\ffmpeg.exe"[m
+     )[m
+ [m
+[31m-    transcript_parts = [][m
+[32m+[m[32m    wav_path = None[m
+[32m+[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        # Create temporary WAV file[m
+[32m+[m[32m        with tempfile.NamedTemporaryFile([m
+[32m+[m[32m            suffix=".wav",[m
+[32m+[m[32m            delete=False[m
+[32m+[m[32m        ) as temp_wav:[m
+[32m+[m[32m            wav_path = temp_wav.name[m
+[32m+[m
+[32m+[m[32m        # Convert MP4 → 16 kHz mono WAV[m
+[32m+[m[32m        subprocess.run([m
+[32m+[m[32m            [[m
+[32m+[m[32m                ffmpeg_path,[m
+[32m+[m[32m                "-y",[m
+[32m+[m[32m                "-i",[m
+[32m+[m[32m                video_path,[m
+[32m+[m[32m                "-ac",[m
+[32m+[m[32m                "1",[m
+[32m+[m[32m                "-ar",[m
+[32m+[m[32m                "16000",[m
+[32m+[m[32m                wav_path,[m
+[32m+[m[32m            ],[m
+[32m+[m[32m            check=True,[m
+[32m+[m[32m            capture_output=True,[m
+[32m+[m[32m            text=True[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m        # Transcribe WAV using Faster-Whisper[m
+[32m+[m[32m        segments, info = whisper_model.transcribe([m
+[32m+[m[32m            wav_path,[m
+[32m+[m[32m            beam_size=1,[m
+[32m+[m[32m            vad_filter=True[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m        transcript_parts = [][m
+ [m
+[31m-    for segment in segments:[m
+[31m-        transcript_parts.append(segment.text.strip())[m
+[32m+[m[32m        for segment in segments:[m
+[32m+[m[32m            text = segment.text.strip()[m
+ [m
+[31m-    transcript = " ".join(transcript_parts)[m
+[32m+[m[32m            if text:[m
+[32m+[m[32m                transcript_parts.append(text)[m
+ [m
+[31m-    return transcript[m
+[32m+[m[32m        transcript = " ".join(transcript_parts)[m
+ [m
+[32m+[m[32m        return transcript[m
+[32m+[m
+[32m+[m[32m    finally:[m
+[32m+[m[32m        # Delete temporary WAV after transcription[m
+[32m+[m[32m        if wav_path and os.path.exists(wav_path):[m
+[32m+[m[32m            os.remove(wav_path)[m
+[32m+[m
+[32m+[m[41m            [m
+ @login_required[m
+ def whisper_test(request, content_id):[m
+ [m
+[36m@@ -453,7 +673,6 @@[m [mdef whisper_test(request, content_id):[m
+         }[m
+     )[m
+ [m
+[31m-@login_required[m
+ @login_required[m
+ def generate_ai_quiz(request, content_id):[m
+ [m
+[1mdiff --git a/notes.txt b/notes.txt[m
+[1mindex 91d3d67..98086ec 100644[m
+[1m--- a/notes.txt[m
+[1m+++ b/notes.txt[m
+[36m@@ -373,4 +373,14 @@[m [mFaster-Whisper Base successfully transcribed the 11:59 DBMS video ✅[m
+ Hindi detected with probability 1.0 ✅[m
+ Next change: au

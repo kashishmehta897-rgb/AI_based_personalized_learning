@@ -93,7 +93,7 @@
             </div>
 
 
-            <form method="POST">
+            <form method="POST" action="{% url 'submit_quiz' quiz.id %}">
 
                 {% csrf_token %}
 

@@ -56,8 +56,10 @@ class LearningContent(models.Model):
     )
     content_file = models.FileField(
     upload_to='content/',
+    max_length=255,
     blank=True,
     null=True
+
 
 )
     difficulty = models.CharField(max_length=50, default='Beginner')
@@ -99,10 +101,20 @@ class Question(models.Model):
     option_d = models.CharField(max_length=255)
     correct_answer = models.CharField(max_length=1)
 
+    # Video timestamp mapping
+    video_start_time = models.FloatField(
+        blank=True,
+        null=True
+    )
+    video_end_time = models.FloatField(
+        blank=True,
+        null=True
+    )
+
     def __str__(self):
         return self.question_text[:50]
 
-
+    
 class QuizAttempt(models.Model):
     student = models.ForeignKey(
         StudentProfile,

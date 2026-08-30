@@ -65,5 +65,10 @@ path(
     views.generate_ai_quiz,
     name='generate_ai_quiz'
 ),
+path(
+    "quiz/<int:quiz_id>/submit/",
+    views.submit_quiz,
+    name="submit_quiz"
+),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

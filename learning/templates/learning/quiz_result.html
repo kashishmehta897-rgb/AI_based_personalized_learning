@@ -1,0 +1,300 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quiz Result | {{ quiz.title }}</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'learning/css/style.css' %}"
+    >
+
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <h2>AI Learning</h2>
+
+            <p>Personalized Learning System</p>
+
+        </div>
+
+        <nav>
+
+            <a href="{% url 'dashboard' %}">
+                Dashboard
+            </a>
+
+            <a href="{% url 'subjects' %}" class="active">
+                Subjects
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a href="{% url 'logout' %}" class="logout-btn">
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <div class="top-header">
+
+            <div>
+
+                <h1>📊 Quiz Result</h1>
+
+                <p>
+                    Here is your performance for this quiz.
+                </p>
+
+            </div>
+
+            <div class="user-info">
+                {{ request.user.username }}
+            </div>
+
+        </div>
+
+
+        <section class="subjects-section">
+
+            <!-- QUIZ TITLE -->
+
+            <div class="section-heading">
+
+                <h2>{{ quiz.title }}</h2>
+
+                <p>
+                    Topic: {{ quiz.topic.name }}
+                </p>
+
+            </div>
+
+
+            <!-- SCORE -->
+
+            <div class="subject-card">
+
+                <h2>
+                    🎯 Your Score
+                </h2>
+
+                <h1>
+                    {{ score }} / {{ total_questions }}
+                </h1>
+
+                <h2>
+                    {{ percentage }}%
+                </h2>
+
+
+                <!-- PERFORMANCE MESSAGE -->
+
+                {% if percentage >= 80 %}
+
+                    <p>
+                        🌟 <strong>Excellent!</strong>
+                    </p>
+
+                    <p>
+                        You have a strong understanding of this topic.
+                    </p>
+
+                {% elif percentage >= 60 %}
+
+                    <p>
+                        👍 <strong>Good Job!</strong>
+                    </p>
+
+                    <p>
+                        You understand most of the topic, but a little
+                        more revision could help.
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        📚 <strong>Needs Review</strong>
+                    </p>
+
+                    <p>
+                        You should review this topic and try the quiz again.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- QUESTION RESULTS -->
+
+            <div class="section-heading">
+
+                <h2>
+                    Question Review
+                </h2>
+
+            </div>
+
+
+            {% for result in results %}
+
+                <div class="subject-card">
+
+                    <h3>
+                        Question {{ forloop.counter }}
+                    </h3>
+
+                    <p>
+                        <strong>
+                            {{ result.question.question_text }}
+                        </strong>
+                    </p>
+
+
+                    {% if result.is_correct %}
+
+                        <!-- CORRECT ANSWER -->
+
+                        <p>
+                            Your answer:
+                            <strong>
+                                {{ result.selected_answer }}
+                            </strong>
+                        </p>
+
+                        <p>
+                            ✅ Correct
+                        </p>
+
+
+                    {% else %}
+
+                        <!-- INCORRECT ANSWER -->
+
+                        <p>
+                            Your answer:
+                            <strong>
+                                {{ result.selected_answer|default:"Not answered" }}
+                            </strong>
+                        </p>
+
+                        <p>
+                            ❌ Incorrect
+                        </p>
+
+                        <p>
+                            Correct answer:
+                            <strong>
+                                {{ result.question.correct_answer }}
+                            </strong>
+                        </p>
+
+
+                        <!-- VIDEO REVIEW -->
+
+                        {% if result.question.video_start_time != None %}
+
+                            <div class="review-video-section">
+
+                                <h4>
+                                    📚 Recommended Review
+                                </h4>
+
+                                <p>
+                                    Review this part of the video to
+                                    better understand this question.
+                                </p>
+
+                                <p>
+                                    ⏱️ Video segment:
+                                    <strong>
+                                        {{ result.question.video_start_time|floatformat:0 }}s
+                                    </strong>
+
+                                    -
+
+                                    <strong>
+                                        {{ result.question.video_end_time|floatformat:0 }}s
+                                    </strong>
+                                </p>
+
+                                <a
+    href="{% url 'learning_content' quiz.topic.id %}?content={{ content.id }}&start={{ result.question.video_start_time }}&end={{ result.question.video_end_time }}"
+    class="back-button"
+>
+    ▶️ Review Video Segment
+</a>
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="review-video-section">
+
+                                <h4>
+                                    📚 Recommended Review
+                                </h4>
+
+                                <p>
+                                    A specific video segment could not
+                                    be identified for this question.
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endif %}
+
+                </div>
+
+                <br>
+
+            {% endfor %}
+
+
+            <!-- BACK BUTTON -->
+
+            <a
+                href="{% url 'learning_content' quiz.topic.id %}"
+                class="back-button"
+            >
+                ← Back to Learning Content
+            </a>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+
+</html>
+
