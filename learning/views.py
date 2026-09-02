@@ -506,7 +506,156 @@ def find_video_timestamp(
         best_segment["start"],
         best_segment["end"]
     )
+def find_pdf_page(pdf_path, question_text, options=None):
+    """
+    Find the most relevant page in the original PDF
+    for a quiz question.
 
+    Returns:
+        page number
+    or:
+        None
+    """
+
+    if not pdf_path or not question_text:
+        return None
+
+    try:
+
+        import fitz
+
+        pdf = fitz.open(pdf_path)
+
+        # ---------------------------------------------
+        # Build search text
+        # ---------------------------------------------
+
+        search_text = question_text
+
+        if options:
+            search_text += " " + " ".join(options)
+
+        search_text = search_text.lower()
+
+        # ---------------------------------------------
+        # Extract useful words
+        # ---------------------------------------------
+
+        words = re.findall(
+            r"\b[a-zA-Z]{3,}\b",
+            search_text
+        )
+
+        stop_words = {
+            "what",
+            "which",
+            "where",
+            "when",
+            "why",
+            "how",
+            "does",
+            "this",
+            "that",
+            "these",
+            "those",
+            "from",
+            "with",
+            "about",
+            "into",
+            "than",
+            "the",
+            "and",
+            "are",
+            "was",
+            "were",
+            "for",
+            "you",
+            "your",
+            "can",
+            "could",
+            "would",
+            "should",
+            "has",
+            "have",
+            "had",
+            "following",
+            "correct",
+            "option",
+            "according",
+            "mentioned",
+            "primary",
+            "reason",
+            "study",
+            "notes"
+        }
+
+        keywords = {
+            word
+            for word in words
+            if word not in stop_words
+        }
+
+        if not keywords:
+            pdf.close()
+            return None
+
+        # ---------------------------------------------
+        # Find best matching PDF page
+        # ---------------------------------------------
+
+        best_page = None
+        best_score = 0
+
+        for page_number, page in enumerate(
+            pdf,
+            start=1
+        ):
+
+            page_text = page.get_text(
+                "text"
+            ).lower()
+
+            if not page_text.strip():
+                continue
+
+            page_words = set(
+                re.findall(
+                    r"\b[a-zA-Z]{3,}\b",
+                    page_text
+                )
+            )
+
+            score = len(
+                keywords.intersection(
+                    page_words
+                )
+            )
+
+            if score > best_score:
+
+                best_score = score
+                best_page = page_number
+
+        pdf.close()
+
+        # ---------------------------------------------
+        # No reliable match
+        # ---------------------------------------------
+
+        if best_page is None or best_score == 0:
+
+            return None
+
+        return best_page
+
+    except Exception as e:
+
+        print(
+            "PDF PAGE FIND ERROR:",
+            str(e)
+        )
+
+        return None
 
 # =================================================
 # AI STUDY NOTES
@@ -1035,25 +1184,25 @@ def generate_ai_quiz(request, content_id):
     # STEP 2: Check timestamped transcript
     # -------------------------------------------------
 
-    transcript_segments = extract_transcript_segments(
-        content.transcript
-    )
+    #transcript_segments = extract_transcript_segments(
+    #    content.transcript
+    #)
 
-    if not transcript_segments:
+    #if not transcript_segments:
 
-        return render(
-            request,
-            "learning/ai_notes.html",
-            {
-                "content": content,
-                "ai_notes": (
-                    "Quiz generation failed because "
-                    "no timestamped transcript is "
-                    "available."
-                ),
-                "from_database": False
-            }
-        )
+     #   return render(
+      #      request,
+       #     "learning/ai_notes.html",
+        #    {
+         #       "content": content,
+           #         "ai_notes": (
+            #        "Quiz generation failed because "
+             #       "no timestamped transcript is "
+              #      "available."
+               # ),
+                #"from_database": False
+            #}
+        #)
 
     # -------------------------------------------------
     # STEP 3: Ask Gemma to generate quiz
@@ -1645,33 +1794,74 @@ Return ONLY the JSON object.
                 }
             )
 
+       
+        
+                # ---------------------------------------------
+        # Find review location
         # ---------------------------------------------
-        # Find hidden video timestamp
+
+        start_time = None
+        end_time = None
+        pdf_page = None
+
+        # ---------------------------------------------
+        # VIDEO CONTENT
         # ---------------------------------------------
 
-        start_time, end_time = find_video_timestamp(
-            content.transcript,
-            item["question"],
-            [
-                item["option_a"],
-                item["option_b"],
-                item["option_c"],
-                item["option_d"]
-            ]
-        )
+        if content.content_type == "video":
 
-        print(
-            "VIDEO TIMESTAMP:",
-            start_time,
-            "->",
-            end_time
-        )
+            if content.transcript:
 
+                transcript_segments = extract_transcript_segments(
+                    content.transcript
+                )
+
+                if transcript_segments:
+
+                    start_time, end_time = find_video_timestamp(
+                        content.transcript,
+                        item["question"],
+                        [
+                            item["option_a"],
+                            item["option_b"],
+                            item["option_c"],
+                            item["option_d"]
+                        ]
+                    )
+
+            print(
+                "VIDEO TIMESTAMP:",
+                start_time,
+                "->",
+                end_time
+            )
+
+        # ---------------------------------------------
+        # PDF CONTENT
+        # ---------------------------------------------
+
+        elif content.content_type == "pdf":
+
+            pdf_page = find_pdf_page(
+                content.content_file.path,
+                item["question"],
+                [
+                    item["option_a"],
+                    item["option_b"],
+                    item["option_c"],
+                    item["option_d"]
+                ]
+            )
+
+            print(
+                "PDF PAGE:",
+                pdf_page
+            )
         # ---------------------------------------------
         # Save question into THE SAME QUIZ
         # ---------------------------------------------
 
-        Question.objects.create(
+            Question.objects.create(
             quiz=quiz,
             question_text=item["question"],
             option_a=item["option_a"],
@@ -1680,9 +1870,9 @@ Return ONLY the JSON object.
             option_d=item["option_d"],
             correct_answer=item["correct_answer"],
             video_start_time=start_time,
-            video_end_time=end_time
+            video_end_time=end_time,
+            pdf_page=pdf_page
         )
-
     # -------------------------------------------------
     # STEP 10: Display ONE Quiz containing 5 Questions
     # -------------------------------------------------
