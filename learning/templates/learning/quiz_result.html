@@ -245,7 +245,7 @@
                                 </p>
 
                                 <a
-    href="{% url 'learning_content' quiz.topic.id %}?content={{ content.id }}&start={{ result.question.video_start_time }}&end={{ result.question.video_end_time }}"
+    href="{% url 'learning_content' quiz.topic.id %}?content={{ content.id }}&start={{ result.question.video_start_time }}&quiz={{ quiz.id }}"
     class="back-button"
 >
     ▶️ Review Video Segment

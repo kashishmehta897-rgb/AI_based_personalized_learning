@@ -184,6 +184,17 @@
     </a>
 
 </div>
+{% if request.GET.quiz %}
+
+    <div class="review-quiz-action">
+
+        <a href="{% url 'retake_quiz' request.GET.quiz %}" class="retake-quiz-btn">
+    📝 Practice Same Quiz 
+</a>
+    </div>
+
+{% endif %}
+
 
 
                             </div>
@@ -230,13 +241,19 @@ document.addEventListener("DOMContentLoaded", function () {
         params.get("start")
     );
 
-    const endTime = parseFloat(
-        params.get("end")
-    );
-
     const contentId = params.get(
         "content"
     );
+
+    const quizId = params.get(
+        "quiz"
+    );
+
+    /*
+     * Only activate review mode when
+     * a valid start time and content ID
+     * are provided.
+     */
 
     if (
         isNaN(startTime) ||
@@ -255,6 +272,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /*
      * Wait until video metadata is loaded.
+     * Then start playback from the
+     * recommended timestamp.
      */
 
     video.addEventListener(
@@ -265,10 +284,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             video.play().catch(
                 function (error) {
+
                     console.log(
                         "Autoplay blocked:",
                         error
                     );
+
                 }
             );
 
@@ -287,35 +308,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         video.play().catch(
             function (error) {
+
                 console.log(
                     "Autoplay blocked:",
                     error
                 );
-            }
-        );
-
-    }
-
-    /*
-     * Stop playback when the recommended
-     * video segment ends.
-     */
-
-    if (!isNaN(endTime)) {
-
-        video.addEventListener(
-            "timeupdate",
-            function () {
-
-                if (
-                    video.currentTime >= endTime
-                ) {
-
-                    video.pause();
-
-                    video.currentTime = startTime;
-
-                }
 
             }
         );
@@ -325,7 +322,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 </script>
-
 </body>
 
 </html>

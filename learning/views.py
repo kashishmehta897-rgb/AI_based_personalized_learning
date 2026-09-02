@@ -47,7 +47,11 @@ def ask_ollama(prompt, json_mode=False, timeout=300):
     data = {
         "model": "gemma3:4b",
         "prompt": prompt,
-        "stream": False
+        "stream": False,
+        "options": {
+            "num_predict": 3000,
+            "temperature": 0.2
+        }
     }
 
     if json_mode:
@@ -63,9 +67,7 @@ def ask_ollama(prompt, json_mode=False, timeout=300):
     )
 
     try:
-
         with urlopen(request, timeout=timeout) as response:
-
             result = json.loads(
                 response.read().decode("utf-8")
             )
@@ -73,9 +75,7 @@ def ask_ollama(prompt, json_mode=False, timeout=300):
         return result.get("response", "")
 
     except Exception as e:
-
         return f"Ollama error: {e}"
-
 
 # =================================================
 # REGISTER
@@ -256,6 +256,7 @@ def topics(request, subject_id):
 # =================================================
 
 @login_required
+@login_required
 def learning_content(request, topic_id):
 
     topic = Topic.objects.get(
@@ -266,15 +267,17 @@ def learning_content(request, topic_id):
         topic=topic
     )
 
+    start_time = request.GET.get("start")
+
     return render(
         request,
         "learning/learning_content.html",
         {
             "topic": topic,
-            "contents": contents
+            "contents": contents,
+            "start_time": start_time,
         }
     )
-
 
 # =================================================
 # AI TEST
@@ -889,9 +892,6 @@ Generate the final study notes now.
 
 def transcribe_video(video_path):
 
-    import subprocess
-    import tempfile
-
     try:
         from faster_whisper import WhisperModel
     except Exception as e:
@@ -900,13 +900,49 @@ def transcribe_video(video_path):
             f"Error: {e}"
         )
 
-    whisper_model = WhisperModel(
-        "base",
-        device="cpu",
-        compute_type="int8"
-    )
+    try:
+        whisper_model = WhisperModel(
+            "base",
+            device="cpu",
+            compute_type="int8"
+        )
 
-    ...
+        # Transcribe the video directly.
+        # Faster-Whisper can read the video/audio file itself.
+        segments, info = whisper_model.transcribe(
+            video_path,
+            beam_size=5,
+            vad_filter=True
+        )
+
+        transcript_lines = []
+
+        for segment in segments:
+
+            text = segment.text.strip()
+
+            if not text:
+                continue
+
+            transcript_lines.append(
+                f"[{segment.start:.2f} - {segment.end:.2f}] {text}"
+            )
+
+        transcript = "\n".join(transcript_lines)
+
+        if not transcript:
+            raise Exception(
+                "Transcription completed, but no speech was detected."
+            )
+
+        return transcript
+
+    except Exception as e:
+        raise Exception(
+            "Video transcription failed.\n\n"
+            f"Error: {e}"
+        )
+
 @login_required
 def whisper_test(request, content_id):
 
@@ -1039,19 +1075,49 @@ IMPORTANT RULES:
 
 1. Use ONLY information contained in the study notes.
 2. Do NOT use outside knowledge.
-3. Do NOT invent facts or examples.
-4. Questions must directly test concepts actually
-   present in the study notes.
-5. Each question must have exactly four options.
-6. Only one option must be correct.
-7. correct_answer must be exactly A, B, C, or D.
-8. Return ONLY valid JSON.
-9. Do NOT use Markdown.
-10. Do NOT add explanations outside the JSON.
-11. Do NOT generate timestamps.
+3. Do NOT invent facts, examples, terminology, code, or syntax.
+4. Questions must directly test concepts actually present in the study notes.
 
-Use exactly this JSON format:
+5. Generate exactly 5 questions.
+6. Each question must have exactly four options.
+7. Only one option must be correct.
+8. "correct_answer" must be exactly one of:
+   A, B, C, or D.
+9. "correct_answer" MUST correspond to the correct option.
 
+10. PROGRAMMING ACCURACY IS CRITICAL.
+
+11. If the study notes contain programming code,
+    preserve the code EXACTLY as written.
+
+12. PROGRAMMING CONTENT:
+
+If the source discusses programming, be extremely careful with
+programming terminology and code.
+
+13. Do NOT invent programming syntax from memory.
+
+14. Do NOT convert uncertain speech-recognition text into
+apparently exact code.
+
+15. If the transcript contains a programming term or code fragment
+that is unclear, preserve the meaning without inventing an exact
+code spelling.
+
+16. Never turn:
+    "C#" into "C-Shop"
+    "args" into "arcs"
+    "Main" into "main"
+    "Console.WriteLine()" into "console.rightline()"
+
+17. Programming keywords, method names, class names, variable names,
+and function names must only be written as exact code when the
+source clearly supports that exact spelling.
+
+18. If the exact programming syntax cannot be established from the
+source, describe the concept in words instead of inventing code.
+
+19. Do not use outside knowledge to create missing code.
 {{
     "questions": [
         {{
@@ -1071,6 +1137,23 @@ Study notes:
 {content.ai_notes}
 --------------------
 
+REMEMBER:
+The study notes are the ONLY source of information.
+
+For programming questions, treat code and technical terms as
+EXACT TEXT. Do not correct, modify, reinterpret, or rewrite them.
+
+For example, if the notes contain:
+
+public static void Main(string[] args)
+
+you MUST NOT generate:
+
+public static void main(string args)
+public static void Main(string args)
+public static void main(string[] arcs)
+
+The spelling and capitalization must remain exactly as provided.
 Generate exactly 5 questions.
 
 Return ONLY the JSON object.
@@ -1481,6 +1564,60 @@ Return ONLY the JSON object.
         item["correct_answer"] = str(
             item["correct_answer"]
         ).strip().upper()
+                # ---------------------------------------------
+        # Validate options
+        # ---------------------------------------------
+
+        options = [
+            str(item["option_a"]).strip(),
+            str(item["option_b"]).strip(),
+            str(item["option_c"]).strip(),
+            str(item["option_d"]).strip(),
+        ]
+
+        # No empty options
+        if any(not option for option in options):
+
+            quiz.delete()
+
+            return render(
+                request,
+                "learning/ai_notes.html",
+                {
+                    "content": content,
+                    "ai_notes": (
+                        "Quiz generation failed because "
+                        "one or more options were empty.\n\n"
+                        f"Question {index + 1}:\n"
+                        f"{json.dumps(item, indent=2)}"
+                    ),
+                    "from_database": False
+                }
+            )
+
+        # No duplicate options
+        normalized_options = [
+            option.lower() for option in options
+        ]
+
+        if len(set(normalized_options)) != 4:
+
+            quiz.delete()
+
+            return render(
+                request,
+                "learning/ai_notes.html",
+                {
+                    "content": content,
+                    "ai_notes": (
+                        "Quiz generation failed because "
+                        "duplicate options were generated.\n\n"
+                        f"Question {index + 1}:\n"
+                        f"{json.dumps(item, indent=2)}"
+                    ),
+                    "from_database": False
+                }
+            )
 
         if item["correct_answer"] not in [
             "A",
@@ -1566,7 +1703,7 @@ Return ONLY the JSON object.
 # SUBMIT QUIZ
 # =================================================
 
-@login_required
+
 @login_required
 def submit_quiz(request, quiz_id):
 
@@ -1650,5 +1787,33 @@ def submit_quiz(request, quiz_id):
             "total_questions": total_questions,
             "percentage": percentage,
             "results": results
+        }
+    )
+# =================================================
+# RETAKE SAME QUIZ
+# =================================================
+
+@login_required
+def retake_quiz(request, quiz_id):
+
+    quiz = Quiz.objects.get(
+        id=quiz_id
+    )
+
+    content = LearningContent.objects.filter(
+        topic=quiz.topic,
+        title=quiz.title.replace(
+            "AI Quiz - ",
+            "",
+            1
+        )
+    ).first()
+
+    return render(
+        request,
+        "learning/quiz.html",
+        {
+            "content": content,
+            "quiz": quiz
         }
     )

@@ -681,4 +681,44 @@ body {
     width: 100%;
     text-align: center;
 }
+/* Retake Quiz Button */
+.retake-quiz-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    margin-top: 10px;
+    padding: 14px 20px;
+
+    border: 1px solid #64748b;
+    border-radius: 10px;
+
+    background: #ffffff;
+    color: #1e293b;
+
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.retake-quiz-btn:hover {
+    background: #f1f5f9;
+    border-color: #475569;
+    color: #0f172a;
+
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.10);
+}
+
+.retake-quiz-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
 

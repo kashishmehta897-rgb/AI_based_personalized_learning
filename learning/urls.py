@@ -32,4 +32,9 @@ path(
     views.submit_quiz,
     name="submit_quiz"
 ),
+path(
+    "quiz/<int:quiz_id>/retake/",
+    views.retake_quiz,
+    name="retake_quiz"
+),
 ]
