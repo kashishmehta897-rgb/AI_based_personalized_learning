@@ -144,13 +144,14 @@
 
     </div>
 
-{% elif content.content_type == 'pdf' and content.content_file %}
-    <a
-        href="{{ content.content_file.url }}"
-        target="_blank"
-        class="subject-button"
-    >
-        📄 Open PDF
+{% elif content.content_type == 'pdf' and content.content_file %} 
+    <a 
+        id="pdf-link-{{ content.id }}"
+        href="{{ content.content_file.url }}" 
+        target="_blank" 
+        class="subject-button" 
+    > 
+        📄 Open PDF 
     </a>
 
 {% elif content.content_type == 'article' and content.content_file %}
@@ -248,6 +249,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const quizId = params.get(
         "quiz"
     );
+        const pdfPage = parseInt(
+        params.get("page")
+    );
+
+    if (
+        !isNaN(pdfPage) &&
+        pdfPage > 0 &&
+        contentId
+    ) {
+        const pdfLink = document.getElementById(
+            "pdf-link-" + contentId
+        );
+
+        if (pdfLink) {
+            pdfLink.href =
+                pdfLink.href +
+                "#page=" +
+                pdfPage;
+        }
+    }
 
     /*
      * Only activate review mode when

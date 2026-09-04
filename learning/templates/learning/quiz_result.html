@@ -163,122 +163,150 @@
 
 
             {% for result in results %}
+    <div class="subject-card">
 
-                <div class="subject-card">
+        <h3>
+            Question {{ forloop.counter }}
+        </h3>
 
-                    <h3>
-                        Question {{ forloop.counter }}
-                    </h3>
+        <p>
+            <strong>
+                {{ result.question.question_text }}
+            </strong>
+        </p>
+
+        {% if result.is_correct %}
+
+            <!-- CORRECT ANSWER -->
+
+            <p>
+                Your answer:
+                <strong>
+                    {{ result.selected_answer }}
+                </strong>
+            </p>
+
+            <p>
+                ✅ Correct
+            </p>
+
+        {% else %}
+
+            <!-- INCORRECT ANSWER -->
+
+            <p>
+                Your answer:
+                <strong>
+                    {{ result.selected_answer|default:"Not answered" }}
+                </strong>
+            </p>
+
+            <p>
+                ❌ Incorrect
+            </p>
+
+            <p>
+                Correct answer:
+                <strong>
+                    {{ result.question.correct_answer }}
+                </strong>
+            </p>
+
+
+            <!-- RECOMMENDED REVIEW -->
+
+            {% if result.question.video_start_time != None %}
+
+                <!-- VIDEO REVIEW -->
+
+                <div class="review-video-section">
+
+                    <h4>
+                        📚 Recommended Review
+                    </h4>
 
                     <p>
+                        Review this part of the video to
+                        better understand this question.
+                    </p>
+
+                    <p>
+                        ⏱️ Video segment:
                         <strong>
-                            {{ result.question.question_text }}
+                            {{ result.question.video_start_time|floatformat:0 }}s
+                        </strong>
+                        -
+                        <strong>
+                            {{ result.question.video_end_time|floatformat:0 }}s
                         </strong>
                     </p>
 
-
-                    {% if result.is_correct %}
-
-                        <!-- CORRECT ANSWER -->
-
-                        <p>
-                            Your answer:
-                            <strong>
-                                {{ result.selected_answer }}
-                            </strong>
-                        </p>
-
-                        <p>
-                            ✅ Correct
-                        </p>
-
-
-                    {% else %}
-
-                        <!-- INCORRECT ANSWER -->
-
-                        <p>
-                            Your answer:
-                            <strong>
-                                {{ result.selected_answer|default:"Not answered" }}
-                            </strong>
-                        </p>
-
-                        <p>
-                            ❌ Incorrect
-                        </p>
-
-                        <p>
-                            Correct answer:
-                            <strong>
-                                {{ result.question.correct_answer }}
-                            </strong>
-                        </p>
-
-
-                        <!-- VIDEO REVIEW -->
-
-                        {% if result.question.video_start_time != None %}
-
-                            <div class="review-video-section">
-
-                                <h4>
-                                    📚 Recommended Review
-                                </h4>
-
-                                <p>
-                                    Review this part of the video to
-                                    better understand this question.
-                                </p>
-
-                                <p>
-                                    ⏱️ Video segment:
-                                    <strong>
-                                        {{ result.question.video_start_time|floatformat:0 }}s
-                                    </strong>
-
-                                    -
-
-                                    <strong>
-                                        {{ result.question.video_end_time|floatformat:0 }}s
-                                    </strong>
-                                </p>
-
-                                <a
-    href="{% url 'learning_content' quiz.topic.id %}?content={{ content.id }}&start={{ result.question.video_start_time }}&quiz={{ quiz.id }}"
-    class="back-button"
->
-    ▶️ Review Video Segment
-</a>
-
-                            </div>
-
-                        {% else %}
-
-                            <div class="review-video-section">
-
-                                <h4>
-                                    📚 Recommended Review
-                                </h4>
-
-                                <p>
-                                    A specific video segment could not
-                                    be identified for this question.
-                                </p>
-
-                            </div>
-
-                        {% endif %}
-
-                    {% endif %}
+                    <a
+                        href="{% url 'learning_content' quiz.topic.id %}?content={{ content.id }}&start={{ result.question.video_start_time }}&quiz={{ quiz.id }}"
+                        class="back-button"
+                    >
+                        ▶️ Review Video Segment
+                    </a>
 
                 </div>
 
-                <br>
+            {% elif result.question.pdf_page != None %}
 
-            {% endfor %}
+                <!-- PDF REVIEW -->
 
+                <div class="review-video-section">
 
+                    <h4>
+                        📚 Recommended Review
+                    </h4>
+
+                    <p>
+                        Review this page of the PDF to
+                        better understand this question.
+                    </p>
+
+                    <p>
+                        📄 Recommended PDF Page:
+                        <strong>
+                            Page {{ result.question.pdf_page }}
+                        </strong>
+                    </p>
+
+                    <a
+                        href="{% url 'learning_content' quiz.topic.id %}?content={{ content.id }}&page={{ result.question.pdf_page }}&quiz={{ quiz.id }}"
+                        class="back-button"
+                    >
+                        📖 Review PDF Page
+                    </a>
+
+                </div>
+
+            {% else %}
+
+                <!-- NO REVIEW LOCATION FOUND -->
+
+                <div class="review-video-section">
+
+                    <h4>
+                        📚 Recommended Review
+                    </h4>
+
+                    <p>
+                        A specific review location could not
+                        be identified for this question.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+    <br>
+
+{% endfor %}
             <!-- BACK BUTTON -->
 
             <a

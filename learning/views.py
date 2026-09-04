@@ -765,19 +765,31 @@ def generate_ai_notes(request, content_id):
 
             pdf_path = content.content_file.path
 
-            pdf_document = fitz.open(
-                pdf_path
-            )
+            pdf_document = fitz.open(pdf_path)
 
-            extracted_text = ""
+            page_texts = []
 
-            for page in pdf_document:
+            for page_number, page in enumerate(
+                pdf_document,
+                start=1
+            ):
 
-                extracted_text += page.get_text()
+                page_text = page.get_text("text").strip()
+
+                if not page_text:
+                    continue
+
+                page_texts.append(
+                    f"\n[PDF PAGE {page_number}]\n"
+                    f"{page_text}\n"
+                    f"[END PDF PAGE {page_number}]\n"
+                )
 
             pdf_document.close()
 
-            source_text = extracted_text.strip()
+            source_text = "\n".join(
+                page_texts
+            ).strip()
 
             if not source_text:
 
@@ -873,45 +885,6 @@ def generate_ai_notes(request, content_id):
                     "from_database": False
                 }
             )
-
-    # =================================================
-    # OTHER CONTENT TYPES
-    # =================================================
-
-    else:
-
-        return render(
-            request,
-            "learning/ai_notes.html",
-            {
-                "content": content,
-                "ai_notes": (
-                    "AI study notes are currently "
-                    "supported for video, PDF, and "
-                    "Article content."
-                ),
-                "from_database": False
-            }
-        )
-
-    # -------------------------------------------------
-    # STEP 3: Make sure source text exists
-    # -------------------------------------------------
-
-    if not source_text.strip():
-
-        return render(
-            request,
-            "learning/ai_notes.html",
-            {
-                "content": content,
-                "ai_notes": (
-                    "No readable content was found."
-                ),
-                "from_database": False
-            }
-        )
-
     # -------------------------------------------------
     # STEP 4: Send source content to Gemma 3 4B
     # -------------------------------------------------
@@ -1857,11 +1830,12 @@ Return ONLY the JSON object.
                 "PDF PAGE:",
                 pdf_page
             )
+
         # ---------------------------------------------
         # Save question into THE SAME QUIZ
         # ---------------------------------------------
 
-            Question.objects.create(
+        Question.objects.create(
             quiz=quiz,
             question_text=item["question"],
             option_a=item["option_a"],
