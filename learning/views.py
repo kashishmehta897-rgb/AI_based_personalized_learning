@@ -1,11 +1,12 @@
 from urllib import request
-
+from .models import StudentProfile, Subject, Topic, LearningContent
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from .forms import LearningContentUploadForm
 
 import json
 import re
@@ -1981,3 +1982,54 @@ def retake_quiz(request, quiz_id):
             "quiz": quiz
         }
     )
+
+def learning_content_list(request):
+    contents = LearningContent.objects.all().order_by('-created_at')
+
+    return render(
+        request,
+        'learning/learning_content_list.html',
+        {
+            'contents': contents
+        }
+    )
+
+# =================================================
+# QUIZ LIST
+# =================================================
+
+@login_required
+def quiz_list(request):
+
+    quizzes = Quiz.objects.all().order_by("-id")
+
+    return render(
+        request,
+        "learning/quiz_list.html",
+        {
+            "quizzes": quizzes
+        }
+    )
+def upload_learning_content(request):
+
+    if request.method == "POST":
+        form = LearningContentUploadForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            content = form.save()
+
+            return redirect(
+                "learning_content_list"
+            )
+
+    else:
+        form = LearningContentUploadForm()
+
+    return render(
+        request,
+        "learning/upload_learning_content.html",
+        {
+            "form": form
+        }
+    )
+    

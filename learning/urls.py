@@ -37,4 +37,14 @@ path(
     views.retake_quiz,
     name="retake_quiz"
 ),
+path(
+    'learning-content/upload/',
+    views.upload_learning_content,
+    name='upload_learning_content'
+),
+path(
+    'quizzes/',
+    views.quiz_list,
+    name='quiz_list'
+),
 ]

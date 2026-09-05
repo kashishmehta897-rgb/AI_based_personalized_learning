@@ -25,9 +25,12 @@
 
             <nav>
     <a href="#" class="active">Dashboard</a>
+    <a href="{% url 'upload_learning_content' %}">
+    Upload Learning Material
+</a>
     <a href="{% url 'subjects' %}">Subjects</a>
-    <a href="#">Learning Content</a>
-    <a href="#">Quizzes</a>
+    <a href="{% url 'learning_content_list' %}">Learning Content</a>
+    <a href="{% url 'quiz_list' %}">Quizzes</a>
     <a href="#">Your Progress</a>
     <a href="#">AI Recommendations</a>
 </nav>
@@ -101,17 +104,16 @@
     <p>Explore subjects available for learning.</p>
 </a>
 
-                      <a href="#" class="learning-card">
-        <div class="card-icon">📖</div>
-        <h3>Learning Content</h3>
-        <p>Study personalized learning materials.</p>
-    </a>
-
-                    <a href="#" class="learning-card">
-                        <div class="card-icon">📝</div>
-                        <h3>Quizzes</h3>
-                        <p>Test your knowledge with quizzes.</p>
-                    </a>
+                      <a href="{% url 'learning_content_list' %}" class="learning-card">
+                        <div class="card-icon">📖</div>
+                        <h3>Learning Content</h3>
+                        <p>Study personalized learning materials.</p>
+                        </a>
+                    <a href="{% url 'quiz_list' %}" class="learning-card"> 
+    <div class="card-icon">📝</div> 
+    <h3>Quizzes</h3> 
+    <p>Test your knowledge with quizzes.</p> 
+</a>
 
                     <a href="#" class="learning-card">
                         <div class="card-icon">📊</div>

@@ -1,0 +1,217 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Upload Learning Content</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'learning/css/style.css' %}"
+    >
+
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h2>LearnAI</h2>
+            <p>Personalized Learning</p>
+        </div>
+
+        <nav>
+
+            <a href="{% url 'dashboard' %}">
+                Dashboard
+            </a>
+
+            <a href="{% url 'subjects' %}">
+                Subjects
+            </a>
+
+            <a href="{% url 'learning_content_list' %}" class="active">
+                Learning Content
+            </a>
+
+            <a href="#">
+                Quizzes
+            </a>
+
+            <a href="#">
+                Your Progress
+            </a>
+
+            <a href="#">
+                AI Recommendations
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a
+                href="{% url 'logout' %}"
+                class="logout-btn"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+
+    <main class="main-content">
+
+        <header class="top-header">
+
+            <div>
+
+                <h1>
+                    Upload Learning Material 📤
+                </h1>
+
+                <p>
+                    Upload a video or PDF to create AI-powered study material.
+                </p>
+
+            </div>
+
+            <div class="user-info">
+                <span>{{ user.username }}</span>
+            </div>
+
+        </header>
+
+
+        <section class="upload-section">
+
+            <div class="upload-card">
+
+                <div class="section-heading">
+
+                    <h2>
+                        Add Learning Content
+                    </h2>
+
+                    <p>
+                        Upload your own educational video or PDF.
+                    </p>
+
+                </div>
+
+
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
+                >
+
+                    {% csrf_token %}
+
+
+                    {% if form.non_field_errors %}
+
+                        <div class="messages">
+                            {{ form.non_field_errors }}
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="form-group">
+
+                        <label for="{{ form.topic.id_for_label }}">
+                            Topic
+                        </label>
+
+                        {{ form.topic }}
+
+                        {{ form.topic.errors }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="{{ form.title.id_for_label }}">
+                            Title
+                        </label>
+
+                        {{ form.title }}
+
+                        {{ form.title.errors }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="{{ form.description.id_for_label }}">
+                            Description
+                        </label>
+
+                        {{ form.description }}
+
+                        {{ form.description.errors }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="{{ form.content_type.id_for_label }}">
+                            Content Type
+                        </label>
+
+                        {{ form.content_type }}
+
+                        {{ form.content_type.errors }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="{{ form.content_file.id_for_label }}">
+                            Select Video or PDF
+                        </label>
+
+                        {{ form.content_file }}
+
+                        {{ form.content_file.errors }}
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="upload-button"
+                    >
+                        Upload Material
+                    </button>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

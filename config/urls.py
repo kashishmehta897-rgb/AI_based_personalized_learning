@@ -75,6 +75,20 @@ path(
     views.retake_quiz,
     name="retake_quiz"
 ),
-
+path(
+    'learning-content/',
+    views.learning_content_list,
+    name='learning_content_list'
+),
+path(
+    'learning-content/upload/',
+    views.upload_learning_content,
+    name='upload_learning_content'
+),
+path(
+    'quizzes/',
+    views.quiz_list,
+    name='quiz_list'
+),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

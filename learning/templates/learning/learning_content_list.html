@@ -1,0 +1,119 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Learning Content</title>
+
+    <link rel="stylesheet" href="{% static 'learning/css/style.css' %}">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h2>LearnAI</h2>
+            <p>Personalized Learning</p>
+        </div>
+
+        <nav>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'subjects' %}">Subjects</a>
+            <a href="{% url 'learning_content_list' %}" class="active">
+                Learning Content
+            </a>
+            <a href="#">Quizzes</a>
+            <a href="#">Your Progress</a>
+            <a href="#">AI Recommendations</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <header class="top-header">
+            <div>
+                <h1>Learning Content 📖</h1>
+                <p>Study your available learning materials.</p>
+            </div>
+
+            <div class="user-info">
+                <span>{{ user.username }}</span>
+            </div>
+        </header>
+
+
+        <section class="learning-section">
+
+            <div class="section-heading">
+                <h2>Available Learning Content</h2>
+                <p>Choose content to continue learning.</p>
+            </div>
+
+
+            <div class="learning-content-grid">
+
+                {% for content in contents %}
+
+                    <div class="learning-content-card">
+
+                        <div class="card-icon">
+                            {% if content.content_type == "video" %}
+                                🎥
+                            {% elif content.content_type == "pdf" %}
+                                📄
+                            {% elif content.content_type == "article" %}
+                                📖
+                            {% elif content.content_type == "exercise" %}
+                                ✏️
+                            {% else %}
+                                📚
+                            {% endif %}
+                        </div>
+
+                        <h3>{{ content.title }}</h3>
+
+                        <p>
+                            {{ content.description|truncatewords:20 }}
+                        </p>
+
+                        <p>
+                            <strong>Topic:</strong>
+                            {{ content.topic.name }}
+                        </p>
+
+                        <a href="{% url 'learning_content' content.topic.id %}" class="notes-button">
+    Open Content
+</a>
+                    </div>
+
+                {% empty %}
+
+                    <p>No learning content is available yet.</p>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>
