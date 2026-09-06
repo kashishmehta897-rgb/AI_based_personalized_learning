@@ -90,5 +90,10 @@ path(
     views.quiz_list,
     name='quiz_list'
 ),
+path(
+    "progress/",
+    views.student_progress,
+    name="student_progress"
+),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

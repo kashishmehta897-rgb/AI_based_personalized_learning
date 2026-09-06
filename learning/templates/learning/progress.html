@@ -1,0 +1,173 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Progress | LearnAI</title>
+
+    <link rel="stylesheet"
+          href="{% static 'learning/css/style.css' %}">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h2>LearnAI</h2>
+            <p>Personalized Learning</p>
+        </div>
+
+        <nav>
+
+            <a href="{% url 'dashboard' %}">
+                Dashboard
+            </a>
+
+            <a href="{% url 'subjects' %}">
+                Subjects
+            </a>
+
+            <a href="{% url 'quiz_list' %}">
+                Quizzes
+            </a>
+
+            <a href="{% url 'student_progress' %}" class="active">
+                Progress
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- Main Content -->
+
+    <main class="main-content">
+
+        <div class="progress-header">
+
+            <div>
+                <h1>📊 My Learning Progress</h1>
+
+                <p>
+                    Track your quiz performance and learning progress.
+                </p>
+            </div>
+
+        </div>
+
+
+        <!-- Progress Statistics -->
+
+        <div class="progress-stats">
+
+            <div class="progress-stat-card">
+
+                <div class="stat-icon">📝</div>
+
+                <div>
+                    <span>Total Quizzes</span>
+
+                    <h2>{{ total_quizzes }}</h2>
+                </div>
+
+            </div>
+
+
+            <div class="progress-stat-card">
+
+                <div class="stat-icon">📈</div>
+
+                <div>
+                    <span>Average Score</span>
+
+                    <h2>{{ average_score }}%</h2>
+                </div>
+
+            </div>
+
+
+            <div class="progress-stat-card">
+
+                <div class="stat-icon">🏆</div>
+
+                <div>
+                    <span>Best Score</span>
+
+                    <h2>{{ best_score }}%</h2>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Quiz History -->
+
+        <!-- Quiz History -->
+
+<div class="quiz-history-section">
+
+    <h2>Quiz History</h2>
+    <p>Your previous quiz attempts and performance.</p>
+
+    <div class="table-container">
+
+        <table class="progress-table">
+
+            <thead>
+                <tr>
+                    <th>Quiz</th>
+                    <th>Score</th>
+                    <th>Total Questions</th>
+                    <th>Percentage</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for attempt in quiz_attempts %}
+
+                <tr>
+                    <td>{{ attempt.quiz.title }}</td>
+                    <td>{{ attempt.score }}</td>
+                    <td>{{ attempt.total_questions }}</td>
+                    <td>{{ attempt.percentage }}%</td>
+                    <td>{{ attempt.created_at|date:"d M Y, H:i" }}</td>
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="5">
+                        No quiz attempts yet.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+    </main>
+
+</div>
+
+</body>
+
+</html>

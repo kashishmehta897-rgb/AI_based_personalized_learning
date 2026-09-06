@@ -31,7 +31,9 @@
     <a href="{% url 'subjects' %}">Subjects</a>
     <a href="{% url 'learning_content_list' %}">Learning Content</a>
     <a href="{% url 'quiz_list' %}">Quizzes</a>
-    <a href="#">Your Progress</a>
+    <a href="{% url 'student_progress' %}">
+    Progress
+</a>
     <a href="#">AI Recommendations</a>
 </nav>
 
@@ -115,7 +117,7 @@
     <p>Test your knowledge with quizzes.</p> 
 </a>
 
-                    <a href="#" class="learning-card">
+                    <a href="{% url 'student_progress' %}" class="learning-card">
                         <div class="card-icon">📊</div>
                         <h3>Your Progress</h3>
                         <p>Track your learning progress and performance.</p>

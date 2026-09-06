@@ -1,5 +1,5 @@
 from urllib import request
-from .models import StudentProfile, Subject, Topic, LearningContent
+from .models import QuizAttempt, StudentProfile, Subject, Topic, LearningContent
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -1938,6 +1938,23 @@ def submit_quiz(request, quiz_id):
     else:
         percentage = 0
 
+# -------------------------------------------------
+# Save quiz attempt for Progress tracking
+# -------------------------------------------------
+
+    # -------------------------------------------------
+    # Save quiz attempt for Progress tracking
+    # -------------------------------------------------
+
+    student = request.user.studentprofile
+
+    QuizAttempt.objects.create(
+        student=student,
+        quiz=quiz,
+        score=score,
+        total_questions=total_questions
+    )
+
     # -------------------------------------------------
     # Display quiz result
     # -------------------------------------------------
@@ -1953,8 +1970,7 @@ def submit_quiz(request, quiz_id):
             "percentage": percentage,
             "results": results
         }
-    )
-# =================================================
+    )# =================================================
 # RETAKE SAME QUIZ
 # =================================================
 
@@ -2030,6 +2046,69 @@ def upload_learning_content(request):
         "learning/upload_learning_content.html",
         {
             "form": form
+        }
+    )
+
+# =================================================
+# STUDENT PROGRESS
+# =================================================
+
+@login_required
+def student_progress(request):
+
+    student = request.user.studentprofile
+
+    attempts = QuizAttempt.objects.filter(
+        student=student
+    ).order_by("completed_at")
+
+    total_attempts = attempts.count()
+
+    if total_attempts > 0:
+
+        total_percentage = 0
+
+        for attempt in attempts:
+
+            if attempt.total_questions > 0:
+
+                percentage = (
+                    attempt.score
+                    / attempt.total_questions
+                ) * 100
+
+                total_percentage += percentage
+
+        average_score = round(
+            total_percentage / total_attempts,
+            2
+        )
+
+        best_score = max(
+            [
+                round(
+                    (attempt.score / attempt.total_questions) * 100,
+                    2
+                )
+                for attempt in attempts
+                if attempt.total_questions > 0
+            ],
+            default=0
+        )
+
+    else:
+
+        average_score = 0
+        best_score = 0
+
+    return render(
+        request,
+        "learning/progress.html",
+        {
+            "attempts": attempts,
+            "total_attempts": total_attempts,
+            "average_score": average_score,
+            "best_score": best_score
         }
     )
     
