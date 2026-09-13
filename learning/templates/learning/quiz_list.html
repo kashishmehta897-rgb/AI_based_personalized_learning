@@ -55,8 +55,8 @@
                 Quizzes
             </a>
 
-            <a href="#">
-                Your Progress
+            <a href="{% url 'student_progress' %}">
+                 Your Progress
             </a>
 
             <a href="#">
@@ -113,78 +113,76 @@
             <div class="section-heading">
 
                 <h2>
-                    Available Quizzes
-                </h2>
+    Quiz Topics
+</h2>
 
-                <p>
-                    Choose a quiz to test your knowledge.
-                </p>
-
+<p>
+    Choose a topic to view all available quizzes.
+</p>
             </div>
 
 
-            {% if quizzes %}
+            {% if topics %}
 
-                <div class="content-grid">
+    <div class="content-grid">
 
-                    {% for quiz in quizzes %}
+        {% for topic in topics %}
 
-                        <div class="content-card">
+            <div class="content-card">
 
-                            <h3>
-                                {{ quiz.title }}
-                            </h3>
+                <h3>
+                    📚 {{ topic.name }}
+                </h3>
 
-                            <p>
-                                {{ quiz.description }}
-                            </p>
+                <p>
+                    {{ topic.description }}
+                </p>
 
-                            <p>
-                                <strong>Topic:</strong>
-                                {{ quiz.topic.name }}
-                            </p>
+                <p>
+                    <strong>Subject:</strong>
+                    {{ topic.subject.name }}
+                </p>
 
-                            <p>
-                                <strong>Questions:</strong>
-                                {{ quiz.questions.count }}
-                            </p>
+                <p>
+                    <strong>Available Quizzes:</strong>
+                    {{ topic.quizzes.count }}
+                </p>
 
-                           <a
-    href="{% url 'retake_quiz' quiz.id %}"
-    class="retake-quiz-btn"
->
-    Start Quiz
-</a>
+                <a
+                    href="{% url 'topic_quizzes' topic.id %}"
+                    class="retake-quiz-btn"
+                >
+                    View Quizzes
+                </a>
 
-                        </div>
+            </div>
 
-                    {% endfor %}
+        {% endfor %}
 
-                </div>
+    </div>
 
-            {% else %}
+{% else %}
 
-                <div class="upload-card">
+    <div class="upload-card">
 
-                    <h2>
-                        No quizzes available yet.
-                    </h2>
+        <h2>
+            No quizzes available yet.
+        </h2>
 
-                    <p>
-                        Generate an AI quiz from your learning material first.
-                    </p>
+        <p>
+            Generate an AI quiz from your learning material first.
+        </p>
 
-                    <a
-                        href="{% url 'learning_content_list' %}"
-                        class="upload-button"
-                    >
-                        Go to Learning Content
-                    </a>
+        <a
+            href="{% url 'learning_content_list' %}"
+            class="upload-button"
+        >
+            Go to Learning Content
+        </a>
 
-                </div>
+    </div>
 
-            {% endif %}
-
+{% endif %}
         </section>
 
     </main>

@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .forms import LearningContentUploadForm
-
+import hashlib
 import json
 import re
 import os
@@ -2014,29 +2014,89 @@ def learning_content_list(request):
 # QUIZ LIST
 # =================================================
 
+
 @login_required
 def quiz_list(request):
 
-    quizzes = Quiz.objects.all().order_by("-id")
+    topics = Topic.objects.filter(
+        quizzes__isnull=False
+    ).distinct()
 
     return render(
         request,
         "learning/quiz_list.html",
         {
+            "topics": topics
+        }
+    )
+
+@login_required
+def topic_quizzes(request, topic_id):
+
+    topic = Topic.objects.get(
+        id=topic_id
+    )
+
+    quizzes = Quiz.objects.filter(
+        topic=topic
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "learning/topic_quizzes.html",
+        {
+            "topic": topic,
             "quizzes": quizzes
         }
     )
-def upload_learning_content(request):
 
+
+def upload_learning_content(request):
     if request.method == "POST":
-        form = LearningContentUploadForm(request.POST, request.FILES)
+        form = LearningContentUploadForm(
+            request.POST,
+            request.FILES
+        )
 
         if form.is_valid():
-            content = form.save()
+            uploaded_file = request.FILES.get("content_file")
 
-            return redirect(
-                "learning_content_list"
-            )
+            # Calculate SHA-256 hash of the uploaded file
+            file_hash = None
+
+            if uploaded_file:
+                sha256 = hashlib.sha256()
+
+                for chunk in uploaded_file.chunks():
+                    sha256.update(chunk)
+
+                file_hash = sha256.hexdigest()
+
+                # Check if this exact file already exists
+                duplicate = LearningContent.objects.filter(
+                    file_hash=file_hash
+                ).exists()
+
+                if duplicate:
+                    form.add_error(
+                        "content_file",
+                        "This learning material has already been uploaded."
+                    )
+                else:
+                    content = form.save(commit=False)
+                    content.file_hash = file_hash
+                    content.save()
+
+                    return redirect(
+                        "learning_content_list"
+                    )
+            else:
+                # Keep existing behavior for content without a file
+                form.save()
+
+                return redirect(
+                    "learning_content_list"
+                )
 
     else:
         form = LearningContentUploadForm()
@@ -2048,53 +2108,50 @@ def upload_learning_content(request):
             "form": form
         }
     )
-
 # =================================================
 # STUDENT PROGRESS
 # =================================================
+
 
 @login_required
 def student_progress(request):
 
     student = request.user.studentprofile
 
-    attempts = QuizAttempt.objects.filter(
+    quiz_attempts = QuizAttempt.objects.filter(
         student=student
-    ).order_by("completed_at")
+    ).order_by("-completed_at")
 
-    total_attempts = attempts.count()
+    total_quizzes = quiz_attempts.count()
 
-    if total_attempts > 0:
+    if total_quizzes > 0:
 
-        total_percentage = 0
+        percentages = []
 
-        for attempt in attempts:
+        for attempt in quiz_attempts:
 
             if attempt.total_questions > 0:
 
-                percentage = (
-                    attempt.score
-                    / attempt.total_questions
-                ) * 100
-
-                total_percentage += percentage
-
-        average_score = round(
-            total_percentage / total_attempts,
-            2
-        )
-
-        best_score = max(
-            [
-                round(
+                percentage = round(
                     (attempt.score / attempt.total_questions) * 100,
                     2
                 )
-                for attempt in attempts
-                if attempt.total_questions > 0
-            ],
-            default=0
-        )
+
+                percentages.append(percentage)
+
+        if percentages:
+
+            average_score = round(
+                sum(percentages) / len(percentages),
+                2
+            )
+
+            best_score = max(percentages)
+
+        else:
+
+            average_score = 0
+            best_score = 0
 
     else:
 
@@ -2105,10 +2162,112 @@ def student_progress(request):
         request,
         "learning/progress.html",
         {
-            "attempts": attempts,
-            "total_attempts": total_attempts,
+            "quiz_attempts": quiz_attempts,
+            "total_quizzes": total_quizzes,
             "average_score": average_score,
             "best_score": best_score
         }
     )
-    
+# =================================================
+# CLEAR QUIZ HISTORY
+# =================================================
+
+@login_required
+def clear_quiz_history(request):
+
+    if request.method == "POST":
+
+        student = request.user.studentprofile
+
+        QuizAttempt.objects.filter(
+            student=student
+        ).delete()
+
+    return redirect(
+        "student_progress"
+    )
+    # =================================================
+# DELETE LEARNING CONTENT
+# =================================================
+
+@login_required
+def delete_learning_content(request, content_id):
+
+    if request.method == "POST":
+
+        content = LearningContent.objects.get(
+            id=content_id
+        )
+
+        # Save file path before deleting database record
+        file_path = None
+
+        if content.content_file:
+            file_path = content.content_file.path
+
+        # Delete database record
+        # This also deletes:
+        # - AI notes
+        # - transcript
+        # - file hash
+        # - content information
+        content.delete()
+
+        # Delete physical uploaded file
+        if file_path and os.path.exists(file_path):
+            os.remove(file_path)
+
+        messages.success(
+            request,
+            "Learning content deleted successfully."
+        )
+
+    return redirect("learning_content_list")
+
+# =================================================
+# DELETE TOPIC
+# =================================================
+
+@login_required
+def delete_topic(request, topic_id):
+
+    if request.method == "POST":
+
+        topic = Topic.objects.get(
+            id=topic_id
+        )
+
+        # Get all learning content belonging to topic
+        contents = LearningContent.objects.filter(
+            topic=topic
+        )
+
+        # Delete physical uploaded files
+        for content in contents:
+
+            if content.content_file:
+                file_path = content.content_file.path
+
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+        # Delete topic
+        #
+        # Because of CASCADE:
+        # Topic
+        #   ↓
+        # LearningContent
+        #   ↓
+        # Quiz
+        #   ↓
+        # Questions
+        #
+        # related database records will also be deleted.
+        topic.delete()
+
+        messages.success(
+            request,
+            "Topic and its learning content deleted successfully."
+        )
+
+    return redirect("subjects")

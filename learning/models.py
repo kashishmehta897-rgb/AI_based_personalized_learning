@@ -62,6 +62,12 @@ class LearningContent(models.Model):
 
 
 )
+    file_hash = models.CharField(
+    max_length=64,
+    blank=True,
+    null=True,
+    unique=True
+)
     difficulty = models.CharField(max_length=50, default='Beginner')
     created_at = models.DateTimeField(auto_now_add=True)
 

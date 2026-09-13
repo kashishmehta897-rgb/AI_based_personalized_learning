@@ -95,5 +95,26 @@ path(
     views.student_progress,
     name="student_progress"
 ),
+path(
+    "progress/clear/",
+    views.clear_quiz_history,
+    name="clear_progress_history"
+),
+path(
+    'topics/<int:topic_id>/quizzes/',
+    views.topic_quizzes,
+    name='topic_quizzes'
+),
+path(
+    "learning-content/<int:content_id>/delete/",
+    views.delete_learning_content,
+    name="delete_learning_content"
+),
+
+path(
+    "topics/<int:topic_id>/delete/",
+    views.delete_topic,
+    name="delete_topic"
+),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

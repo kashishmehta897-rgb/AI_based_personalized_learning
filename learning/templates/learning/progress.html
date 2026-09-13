@@ -118,9 +118,31 @@
 
 <div class="quiz-history-section">
 
-    <h2>Quiz History</h2>
-    <p>Your previous quiz attempts and performance.</p>
+    <div class="quiz-history-header">
 
+    <div>
+        <h2>Quiz History</h2>
+        <p>Your previous quiz attempts and performance.</p>
+    </div>
+
+    {% if quiz_attempts %}
+    <form method="POST"
+          action="{% url 'clear_progress_history' %}">
+
+        {% csrf_token %}
+
+        <button type="submit"
+                class="clear-history-btn"
+                onclick="return confirm('Are you sure you want to clear your quiz history?');">
+
+            🗑 Clear History
+
+        </button>
+
+    </form>
+    {% endif %}
+
+</div>
     <div class="table-container">
 
         <table class="progress-table">
