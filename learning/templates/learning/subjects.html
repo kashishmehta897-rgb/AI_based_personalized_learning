@@ -1,157 +1,96 @@
-{% load static %}
+{% extends "learning/base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Subjects | LearnAI{% endblock %}
 
-<head>
+{% block content %}
 
-    <meta charset="UTF-8">
+<!-- Header -->
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div class="top-header">
 
-    <title>Subjects | AI Learning System</title>
+    <div>
 
-    <link rel="stylesheet" href="{% static 'learning/css/style.css' %}">
+        <h1>Available Subjects</h1>
 
-</head>
-
-<body>
-
-    <div class="dashboard-container">
-
-        <!-- SIDEBAR -->
-
-        <aside class="sidebar">
-
-            <div class="logo">
-
-                <h2>AI Learning</h2>
-
-                <p>Personalized Learning System</p>
-
-            </div>
-
-            <nav>
-
-                <a href="{% url 'dashboard' %}">
-                    Dashboard
-                </a>
-
-                <a href="{% url 'subjects' %}" class="active">
-                    Subjects
-                </a>
-
-            </nav>
-
-            <div class="sidebar-bottom">
-
-                <a href="{% url 'logout' %}" class="logout-btn">
-                    Logout
-                </a>
-
-            </div>
-
-        </aside>
-
-
-        <!-- MAIN CONTENT -->
-
-        <main class="main-content">
-
-            <!-- HEADER -->
-
-            <div class="top-header">
-
-                <div>
-
-                    <h1>Available Subjects</h1>
-
-                    <p>
-                        Choose a subject to explore its topics and start learning.
-                    </p>
-
-                </div>
-
-                <div class="user-info">
-
-                    {{ request.user.username }}
-
-                </div>
-
-            </div>
-
-
-            <!-- SUBJECTS -->
-
-            <section class="subjects-section">
-
-                <div class="section-heading">
-
-                    <h2>Subjects</h2>
-
-                    <p>
-                        Select a subject to continue your learning journey.
-                    </p>
-
-                </div>
-
-
-                {% if subjects %}
-
-                    <div class="subjects-grid">
-
-                        {% for subject in subjects %}
-                        
-                        <div class="subject-card subject-page-card">
-                            
-
-                                <h2>
-                                    {{ subject.name }}
-                                </h2>
-
-                                <p>
-                                    {{ subject.description }}
-                                </p>
-
-                                <a
-                                    href="{% url 'topics' subject.id %}"
-                                    class="subject-button"
-                                >
-                                    View Topics
-                                </a>
-
-                            </div>
-
-                        {% endfor %}
-
-                    </div>
-
-                {% else %}
-
-                    <div class="empty-message">
-
-                        <p>
-                            No subjects available.
-                        </p>
-
-                    </div>
-
-                {% endif %}
-
-
-                <a
-                    href="{% url 'dashboard' %}"
-                    class="back-button"
-                >
-                    ← Back to Dashboard
-                </a>
-
-            </section>
-
-        </main>
+        <p>
+            Choose a subject to explore its topics and start learning.
+        </p>
 
     </div>
 
-</body>
+    <div class="user-info">
 
-</html>
+        {{ request.user.username }}
+
+    </div>
+
+</div>
+
+
+<!-- Subjects -->
+
+<section class="subjects-section">
+
+    <div class="section-heading">
+
+        <h2>Subjects</h2>
+
+        <p>
+            Select a subject to continue your learning journey.
+        </p>
+
+    </div>
+
+
+    {% if subjects %}
+
+        <div class="subjects-grid">
+
+            {% for subject in subjects %}
+
+                <div class="subject-card subject-page-card">
+
+                    <h2>
+                        {{ subject.name }}
+                    </h2>
+
+                    <p>
+                        {{ subject.description }}
+                    </p>
+
+                    <a
+                        href="{% url 'topics' subject.id %}"
+                        class="subject-button"
+                    >
+                        View Topics
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-message">
+
+            <p>
+                No subjects available.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <a
+        href="{% url 'dashboard' %}"
+        class="back-button"
+    >
+        ← Back to Dashboard
+    </a>
+
+</section>
+
+{% endblock %}

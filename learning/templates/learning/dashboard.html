@@ -1,141 +1,100 @@
-{% load static %}
+{% extends "learning/base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}Student Dashboard{% endblock %}
 
-    <title>Student Dashboard</title>
+{% block content %}
 
-    <link rel="stylesheet" href="{% static 'learning/css/style.css' %}">
-</head>
+<!-- Top Header -->
+<header class="top-header">
 
-<body>
+    <div>
+        <h1>Welcome, {{ user.username }}! 👋</h1>
+        <p>Let's continue your learning journey.</p>
+    </div>
 
-    <div class="dashboard-container">
+    <div class="user-info">
+        <span>{{ user.username }}</span>
+    </div>
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-
-            <div class="logo">
-                <h2>LearnAI</h2>
-                <p>Personalized Learning</p>
-            </div>
-
-            <nav>
-    <a href="#" class="active">Dashboard</a>
-    <a href="{% url 'upload_learning_content' %}">
-    Upload Learning Material
-</a>
-    <a href="{% url 'subjects' %}">Subjects</a>
-    <a href="{% url 'learning_content_list' %}">Learning Content</a>
-    <a href="{% url 'quiz_list' %}">Quizzes</a>
-    <a href="{% url 'student_progress' %}">
-    Progress
-</a>
-    <a href="#">AI Recommendations</a>
-</nav>
-
-            <div class="sidebar-bottom">
-                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
-            </div>
-
-        </aside>
+</header>
 
 
-        <!-- Main Content -->
-        <main class="main-content">
+<!-- Learning Profile -->
+<section class="profile-section">
 
-            <!-- Top Header -->
-            <header class="top-header">
-                <div>
-                    <h1>Welcome, {{ user.username }}! 👋</h1>
-                    <p>Let's continue your learning journey.</p>
-                </div>
+    <div class="section-heading">
+        <h2>Your Learning Profile</h2>
+        <p>Your personalized learning information</p>
+    </div>
 
-                <div class="user-info">
-                    <span>{{ user.username }}</span>
-                </div>
-            </header>
+    <div class="profile-cards">
 
+        <div class="profile-card">
+            <span class="card-label">Education Level</span>
+            <h3>{{ student.education_level }}</h3>
+        </div>
 
-            <!-- Learning Profile -->
-            <section class="profile-section">
+        <div class="profile-card">
+            <span class="card-label">Learning Goal</span>
+            <h3>{{ student.learning_goal }}</h3>
+        </div>
 
-                <div class="section-heading">
-                    <h2>Your Learning Profile</h2>
-                    <p>Your personalized learning information</p>
-                </div>
-
-                <div class="profile-cards">
-
-                    <div class="profile-card">
-                        <span class="card-label">Education Level</span>
-                        <h3>{{ student.education_level }}</h3>
-                    </div>
-
-                    <div class="profile-card">
-                        <span class="card-label">Learning Goal</span>
-                        <h3>{{ student.learning_goal }}</h3>
-                    </div>
-
-                    <div class="profile-card">
-                        <span class="card-label">Learning Style</span>
-                        <h3>{{ student.preferred_learning_style }}</h3>
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- Learning System -->
-            <section class="learning-section">
-
-                <div class="section-heading">
-                    <h2>Learning System</h2>
-                    <p>Access your personalized learning tools</p>
-                </div>
-
-                <div class="learning-grid">
-
-                    <a href="{% url 'subjects' %}" class="learning-card">
-                    <div class="card-icon">📚</div>
-                    <h3>Subjects</h3>
-                         <p>Explore subjects available for learning.</p>
-                    </a>
-
-                      <a href="{% url 'learning_content_list' %}" class="learning-card">
-                        <div class="card-icon">📖</div>
-                        <h3>Learning Content</h3>
-                        <p>Study personalized learning materials.</p>
-                        </a>
-                        <a href="{% url 'quiz_list' %}" class="learning-card"> 
-                        <div class="card-icon">📝</div> 
-                        <h3>Quizzes</h3> 
-                        <p>Test your knowledge with quizzes.</p> 
-                        </a>
-
-                    <a href="{% url 'student_progress' %}" class="learning-card">
-                        <div class="card-icon">📊</div>
-                        <h3>Your Progress</h3>
-                        <p>Track your learning progress and performance.</p>
-                    </a>
-
-                    <a href="#" class="learning-card">
-                        <div class="card-icon">🤖</div>
-                        <h3>AI Recommendations</h3>
-                        <p>Get personalized recommendations based on your learning.</p>
-                    </a>
-
-                </div>
-
-            </section>
-
-        </main>
+        <div class="profile-card">
+            <span class="card-label">Learning Style</span>
+            <h3>{{ student.preferred_learning_style }}</h3>
+        </div>
 
     </div>
 
-</body>
-</html>
+</section>
+
+
+<!-- Learning System -->
+<section class="learning-section">
+
+    <div class="section-heading">
+        <h2>Learning System</h2>
+        <p>Access your personalized learning tools</p>
+    </div>
+
+    <div class="learning-grid">
+
+        <a href="{% url 'subjects' %}" class="learning-card">
+            <div class="card-icon">📚</div>
+            <h3>Subjects</h3>
+            <p>Explore subjects available for learning.</p>
+        </a>
+
+
+        <a href="{% url 'learning_content_list' %}" class="learning-card">
+            <div class="card-icon">📖</div>
+            <h3>Learning Content</h3>
+            <p>Study personalized learning materials.</p>
+        </a>
+
+
+        <a href="{% url 'quiz_list' %}" class="learning-card">
+            <div class="card-icon">📝</div>
+            <h3>Quizzes</h3>
+            <p>Test your knowledge with quizzes.</p>
+        </a>
+
+
+        <a href="{% url 'student_progress' %}" class="learning-card">
+            <div class="card-icon">📊</div>
+            <h3>Your Progress</h3>
+            <p>Track your learning progress and performance.</p>
+        </a>
+
+
+        <a href="#" class="learning-card">
+            <div class="card-icon">🤖</div>
+            <h3>AI Recommendations</h3>
+            <p>Get personalized recommendations based on your learning.</p>
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}

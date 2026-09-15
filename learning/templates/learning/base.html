@@ -1,0 +1,92 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}LearnAI{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'learning/css/style.css' %}">
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <h2>LearnAI</h2>
+                <p>Personalized Learning</p>
+            </div>
+
+            <nav>
+
+                <!-- Dashboard -->
+                <a href="{% url 'dashboard' %}"
+                class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                Dashboard
+                </a>
+
+                <!-- Upload Learning Material -->
+                <a href="{% url 'upload_learning_content' %}"
+                   class="{% if request.resolver_match.url_name == 'upload_learning_content' %}active{% endif %}">
+                    Upload Learning Material
+                </a>
+
+                <!-- Subjects -->
+                <a href="{% url 'subjects' %}" 
+                    class="{% if request.resolver_match.url_name == 'subjects' or request.resolver_match.url_name == 'topics' %}active{% endif %}">
+                    Subjects
+                </a>
+
+                <!-- Learning Content -->
+                <a href="{% url 'learning_content_list' %}"
+                   class="{% if request.resolver_match.url_name == 'learning_content_list' %}active{% endif %}">
+                    Learning Content
+                </a>
+
+                <!-- Quizzes --> 
+                <a href="{% url 'quiz_list' %}" 
+                    class="{% if request.resolver_match.url_name == 'quiz_list' or request.resolver_match.url_name == 'topic_quizzes' %}active{% endif %}"> 
+                        Quizzes 
+                </a>
+
+                <!-- Progress -->
+                <a href="{% url 'student_progress' %}"
+                   class="{% if request.resolver_match.url_name == 'student_progress' %}active{% endif %}">
+                    Progress
+                </a>
+
+                <!-- AI Recommendations -->
+                <a href="#">
+                    AI Recommendations
+                </a>
+
+            </nav>
+
+            <!-- Logout -->
+            <div class="sidebar-bottom">
+                <a href="{% url 'logout' %}" class="logout-btn">
+                    Logout
+                </a>
+            </div>
+
+        </aside>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            {% block content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+
+</body>
+</html>

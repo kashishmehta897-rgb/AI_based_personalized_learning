@@ -1,175 +1,107 @@
-{% load static %}
+{% extends "learning/base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}{{ subject.name }} | Topics{% endblock %}
 
-<head>
+{% block content %}
 
-    <meta charset="UTF-8">
+<!-- Header -->
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div class="top-header">
 
-    <title>{{ subject.name }} | Topics</title>
+    <div>
 
-    <link rel="stylesheet" href="{% static 'learning/css/style.css' %}">
+        <h1>{{ subject.name }}</h1>
 
-</head>
-
-<body>
-
-    <div class="dashboard-container">
-
-        <!-- =========================
-             SIDEBAR
-        ========================== -->
-
-        <aside class="sidebar">
-
-            <div class="logo">
-
-                <h2>AI Learning</h2>
-
-                <p>Personalized Learning System</p>
-
-            </div>
-
-
-            <nav>
-
-                <a href="{% url 'dashboard' %}">
-                    Dashboard
-                </a>
-
-                <a href="{% url 'subjects' %}" class="active">
-                    Subjects
-                </a>
-
-            </nav>
-
-
-            <div class="sidebar-bottom">
-
-                <a href="{% url 'logout' %}" class="logout-btn">
-                    Logout
-                </a>
-
-            </div>
-
-        </aside>
-
-
-        <!-- =========================
-             MAIN CONTENT
-        ========================== -->
-
-        <main class="main-content">
-
-
-            <!-- Header -->
-
-            <div class="top-header">
-
-                <div>
-
-                    <h1>{{ subject.name }}</h1>
-
-                    <p>
-                        Explore the topics available in this subject.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- Subject Description -->
-
-            <section class="subjects-section">
-
-                <div class="section-heading">
-
-                    <h2>About This Subject</h2>
-
-                    <p>
-                        {{ subject.description }}
-                    </p>
-
-                </div>
-
-            </section>
-
-
-            <!-- Topics -->
-
-            <section class="subjects-section">
-
-                <div class="section-heading">
-
-                    <h2>Available Topics</h2>
-
-                    <p>
-                        Select a topic to start learning.
-                    </p>
-
-                </div>
-
-
-                {% if topics %}
-
-                    <div class="subjects-grid">
-
-                        {% for topic in topics %}
-
-                            <div class="subject-card topic-page-card">
-
-                                <h2>
-                                    {{ topic.name }}
-                                </h2>
-
-                                <p>
-                                    {{ topic.description }}
-                                </p>
-
-                                <a
-    href="{% url 'learning_content' topic.id %}"
-    class="subject-button"
->
-    View Learning Content
-</a>
-
-                            </div>
-
-                        {% endfor %}
-
-                    </div>
-
-                {% else %}
-
-                    <div class="empty-message">
-
-                        <p>
-                            No 
-                            topics available for this subject.
-                        </p>
-
-                    </div>
-
-                {% endif %}
-
-
-                <a
-                    href="{% url 'subjects' %}"
-                    class="back-button"
-                >
-                    ← Back to Subjects
-                </a>
-
-            </section>
-
-        </main>
+        <p>
+            Explore the topics available in this subject.
+        </p>
 
     </div>
 
-</body>
+</div>
 
-</html>
+
+<!-- Subject Description -->
+
+<section class="subjects-section">
+
+    <div class="section-heading">
+
+        <h2>About This Subject</h2>
+
+        <p>
+            {{ subject.description }}
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- Topics -->
+
+<section class="subjects-section">
+
+    <div class="section-heading">
+
+        <h2>Available Topics</h2>
+
+        <p>
+            Select a topic to start learning.
+        </p>
+
+    </div>
+
+
+    {% if topics %}
+
+        <div class="subjects-grid">
+
+            {% for topic in topics %}
+
+                <div class="subject-card topic-page-card">
+
+                    <h2>
+                        {{ topic.name }}
+                    </h2>
+
+                    <p>
+                        {{ topic.description }}
+                    </p>
+
+                    <a
+                        href="{% url 'learning_content' topic.id %}"
+                        class="subject-button"
+                    >
+                        View Learning Content
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-message">
+
+            <p>
+                No topics available for this subject.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <a
+        href="{% url 'subjects' %}"
+        class="back-button"
+    >
+        ← Back to Subjects
+    </a>
+
+</section>
+
+{% endblock %}

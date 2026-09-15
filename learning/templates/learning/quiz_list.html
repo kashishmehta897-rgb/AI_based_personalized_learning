@@ -1,193 +1,115 @@
-{% load static %}
+{% extends "learning/base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Quizzes | LearnAI{% endblock %}
 
-<head>
+{% block content %}
 
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<!-- Top Header -->
 
-    <title>Quizzes | LearnAI</title>
+<header class="top-header">
 
-    <link
-        rel="stylesheet"
-        href="{% static 'learning/css/style.css' %}"
-    >
+    <div>
 
-</head>
+        <h1>
+            Quizzes 📝
+        </h1>
 
-<body>
-
-<div class="dashboard-container">
-
-    <!-- Sidebar -->
-
-    <aside class="sidebar">
-
-        <div class="logo">
-            <h2>LearnAI</h2>
-            <p>Personalized Learning</p>
-        </div>
-
-        <nav>
-
-            <a href="{% url 'dashboard' %}">
-                Dashboard
-            </a>
-
-            <a href="{% url 'upload_learning_content' %}">
-                Upload Learning Material
-            </a>
-
-            <a href="{% url 'subjects' %}">
-                Subjects
-            </a>
-
-            <a href="{% url 'learning_content_list' %}">
-                Learning Content
-            </a>
-
-            <a href="{% url 'quiz_list' %}" class="active">
-                Quizzes
-            </a>
-
-            <a href="{% url 'student_progress' %}">
-                 Your Progress
-            </a>
-
-            <a href="#">
-                AI Recommendations
-            </a>
-
-        </nav>
-
-        <div class="sidebar-bottom">
-
-            <a
-                href="{% url 'logout' %}"
-                class="logout-btn"
-            >
-                Logout
-            </a>
-
-        </div>
-
-    </aside>
-
-
-    <!-- Main Content -->
-
-    <main class="main-content">
-
-        <header class="top-header">
-
-            <div>
-
-                <h1>
-                    Quizzes 📝
-                </h1>
-
-                <p>
-                    Test your knowledge with AI-generated quizzes.
-                </p>
-
-            </div>
-
-            <div class="user-info">
-
-                <span>
-                    {{ user.username }}
-                </span>
-
-            </div>
-
-        </header>
-
-
-        <section class="content-section">
-
-            <div class="section-heading">
-
-                <h2>
-    Quiz Topics
-</h2>
-
-<p>
-    Choose a topic to view all available quizzes.
-</p>
-            </div>
-
-
-            {% if topics %}
-
-    <div class="content-grid">
-
-        {% for topic in topics %}
-
-            <div class="content-card">
-
-                <h3>
-                    📚 {{ topic.name }}
-                </h3>
-
-                <p>
-                    {{ topic.description }}
-                </p>
-
-                <p>
-                    <strong>Subject:</strong>
-                    {{ topic.subject.name }}
-                </p>
-
-                <p>
-                    <strong>Available Quizzes:</strong>
-                    {{ topic.quizzes.count }}
-                </p>
-
-                <a
-                    href="{% url 'topic_quizzes' topic.id %}"
-                    class="retake-quiz-btn"
-                >
-                    View Quizzes
-                </a>
-
-            </div>
-
-        {% endfor %}
+        <p>
+            Test your knowledge with AI-generated quizzes.
+        </p>
 
     </div>
 
-{% else %}
+    <div class="user-info">
 
-    <div class="upload-card">
+        <span>
+            {{ user.username }}
+        </span>
+
+    </div>
+
+</header>
+
+
+<!-- Quiz Topics -->
+
+<section class="content-section">
+
+    <div class="section-heading">
 
         <h2>
-            No quizzes available yet.
+            Quiz Topics
         </h2>
 
         <p>
-            Generate an AI quiz from your learning material first.
+            Choose a topic to view all available quizzes.
         </p>
-
-        <a
-            href="{% url 'learning_content_list' %}"
-            class="upload-button"
-        >
-            Go to Learning Content
-        </a>
 
     </div>
 
-{% endif %}
-        </section>
 
-    </main>
+    {% if topics %}
 
-</div>
+        <div class="content-grid">
 
-</body>
-</html>
+            {% for topic in topics %}
+
+                <div class="content-card">
+
+                    <h3>
+                        📚 {{ topic.name }}
+                    </h3>
+
+                    <p>
+                        {{ topic.description }}
+                    </p>
+
+                    <p>
+                        <strong>Subject:</strong>
+                        {{ topic.subject.name }}
+                    </p>
+
+                    <p>
+                        <strong>Available Quizzes:</strong>
+                        {{ topic.quizzes.count }}
+                    </p>
+
+                    <a
+                        href="{% url 'topic_quizzes' topic.id %}"
+                        class="retake-quiz-btn"
+                    >
+                        View Quizzes
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="upload-card">
+
+            <h2>
+                No quizzes available yet.
+            </h2>
+
+            <p>
+                Generate an AI quiz from your learning material first.
+            </p>
+
+            <a
+                href="{% url 'learning_content_list' %}"
+                class="upload-button"
+            >
+                Go to Learning Content
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

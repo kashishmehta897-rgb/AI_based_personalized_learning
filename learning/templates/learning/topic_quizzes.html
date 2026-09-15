@@ -1,211 +1,121 @@
-{% load static %}
+{% extends "learning/base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}{{ topic.name }} Quizzes | LearnAI{% endblock %}
 
-<head>
+{% block content %}
 
-    <meta charset="UTF-8">
+<header class="top-header">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <div>
 
-    <title>{{ topic.name }} Quizzes | LearnAI</title>
+        <h1>
+            {{ topic.name }} Quizzes 📝
+        </h1>
 
-    <link
-        rel="stylesheet"
-        href="{% static 'learning/css/style.css' %}"
-    >
+        <p>
+            Test your knowledge with AI-generated quizzes.
+        </p>
 
-</head>
+    </div>
 
-<body>
+    <div class="user-info">
 
-<div class="dashboard-container">
+        <span>
+            {{ user.username }}
+        </span>
 
-    <!-- Sidebar -->
+    </div>
 
-    <aside class="sidebar">
+</header>
 
-        <div class="logo">
 
-            <h2>LearnAI</h2>
+<section class="content-section">
 
-            <p>Personalized Learning</p>
+    <div class="section-heading">
 
-        </div>
+        <h2>
+            All Quizzes for {{ topic.name }}
+        </h2>
 
+        <p>
+            {{ quizzes.count }} quiz{{ quizzes.count|pluralize }} generated for this topic.
+        </p>
 
-        <nav>
+    </div>
 
-            <a href="{% url 'dashboard' %}">
-                Dashboard
-            </a>
 
-            <a href="{% url 'upload_learning_content' %}">
-                Upload Learning Material
-            </a>
+    <!-- ONE MAIN CARD -->
 
-            <a href="{% url 'subjects' %}">
-                Subjects
-            </a>
+    <div class="all-quizzes-card">
 
-            <a href="{% url 'learning_content_list' %}">
-                Learning Content
-            </a>
+        {% for quiz in quizzes %}
 
-            <a href="{% url 'quiz_list' %}" class="active">
-                Quizzes
-            </a>
+            <div class="quiz-row">
 
-            <a href="{% url 'student_progress' %}">
-                Your Progress
-            </a>
+                <!-- Quiz Information -->
 
-            <a href="#">
-                AI Recommendations
-            </a>
+                <div class="quiz-info">
 
-        </nav>
+                    <h3>
+                        {{ quiz.title }}
+                    </h3>
 
-
-        <div class="sidebar-bottom">
-
-            <a
-                href="{% url 'logout' %}"
-                class="logout-btn"
-            >
-                Logout
-            </a>
-
-        </div>
-
-    </aside>
-
-
-    <!-- Main Content -->
-
-    <main class="main-content">
-
-        <header class="top-header">
-
-            <div>
-
-                <h1>
-                    {{ topic.name }} Quizzes 📝
-                </h1>
-
-                <p>
-                    Test your knowledge with AI-generated quizzes.
-                </p>
-
-            </div>
-
-            <div class="user-info">
-
-                <span>
-                    {{ user.username }}
-                </span>
-
-            </div>
-
-        </header>
-
-
-        <section class="content-section">
-
-            <div class="section-heading">
-
-                <h2>
-                    All Quizzes for {{ topic.name }}
-                </h2>
-
-                <p>
-                    {{ quizzes.count }} quiz{{ quizzes.count|pluralize }} generated for this topic.
-                </p>
-
-            </div>
-
-
-            <!-- ONE MAIN CARD -->
-
-            <div class="all-quizzes-card">
-
-                {% for quiz in quizzes %}
-
-                    <div class="quiz-row">
-
-                        <!-- Quiz Information -->
-
-                        <div class="quiz-info">
-
-                            <h3>
-                                {{ quiz.title }}
-                            </h3>
-
-                            <p>
-                                <strong>Generated:</strong>
-                                {{ quiz.created_at|date:"M d, Y" }}
-                            </p>
-
-                        </div>
-
-
-                        <!-- Questions -->
-
-                        <div class="quiz-questions">
-
-                            <strong>
-                                Questions: {{ quiz.questions.count }}
-                            </strong>
-
-                        </div>
-
-
-                        <!-- Start Quiz -->
-
-                        <div class="quiz-action">
-
-                            <a
-                                href="{% url 'retake_quiz' quiz.id %}"
-                                class="quiz-start-btn"
-                            >
-                                Start Quiz
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                {% empty %}
-
-                    <p class="no-topic-quizzes">
-                        No quizzes are available for this topic yet.
+                    <p>
+                        <strong>Generated:</strong>
+                        {{ quiz.created_at|date:"M d, Y" }}
                     </p>
 
-                {% endfor %}
+                </div>
+
+
+                <!-- Questions -->
+
+                <div class="quiz-questions">
+
+                    <strong>
+                        Questions: {{ quiz.questions.count }}
+                    </strong>
+
+                </div>
+
+
+                <!-- Start Quiz -->
+
+                <div class="quiz-action">
+
+                    <a
+                        href="{% url 'retake_quiz' quiz.id %}"
+                        class="quiz-start-btn"
+                    >
+                        Start Quiz
+                    </a>
+
+                </div>
 
             </div>
 
+        {% empty %}
 
-            <div class="back-topic-container">
+            <p class="no-topic-quizzes">
+                No quizzes are available for this topic yet.
+            </p>
 
-                <a
-                    href="{% url 'quiz_list' %}"
-                    class="back-topic-btn"
-                >
-                    ← Back to Topics
-                </a>
+        {% endfor %}
 
-            </div>
+    </div>
 
-        </section>
 
-    </main>
+    <div class="back-topic-container">
 
-</div>
+        <a
+            href="{% url 'quiz_list' %}"
+            class="back-topic-btn"
+        >
+            ← Back to Topics
+        </a>
 
-</body>
-</html>
+    </div>
+
+</section>
+
+{% endblock %}

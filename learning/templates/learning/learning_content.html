@@ -1,235 +1,199 @@
-{% load static %}
+{% extends "learning/base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}{{ topic.name }} | Learning Content{% endblock %}
 
-<head>
+{% block content %}
 
-    <meta charset="UTF-8">
+<div class="top-header">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div>
 
-    <title>{{ topic.name }} | Learning Content</title>
+        <h1>{{ topic.name }}</h1>
 
-    <link
-        rel="stylesheet"
-        href="{% static 'learning/css/style.css' %}"
-    >
-
-</head>
-
-<body>
-
-    <div class="dashboard-container">
-
-        <!-- SIDEBAR -->
-
-        <aside class="sidebar">
-
-            <div class="logo">
-
-                <h2>AI Learning</h2>
-
-                <p>Personalized Learning System</p>
-
-            </div>
-
-            <nav>
-
-                <a href="{% url 'dashboard' %}">
-                    Dashboard
-                </a>
-
-                <a href="{% url 'subjects' %}" class="active">
-                    Subjects
-                </a>
-
-            </nav>
-
-            <div class="sidebar-bottom">
-
-                <a href="{% url 'logout' %}" class="logout-btn">
-                    Logout
-                </a>
-
-            </div>
-
-        </aside>
-
-
-        <!-- MAIN CONTENT -->
-
-        <main class="main-content">
-
-            <div class="top-header">
-
-                <div>
-
-                    <h1>{{ topic.name }}</h1>
-
-                    <p>
-                        Learning materials for this topic.
-                    </p>
-
-                </div>
-
-                <div class="user-info">
-                    {{ request.user.username }}
-                </div>
-
-            </div>
-
-
-            <section class="subjects-section">
-
-                <div class="section-heading">
-
-                    <h2>Learning Content</h2>
-
-                    <p>
-                        Study the available materials below.
-                    </p>
-
-                </div>
-
-
-                {% if contents %}
-
-                    <div class="subjects-grid">
-
-                        {% for content in contents %}
-
-                            <div class="subject-card content-card">
-
-                                <h2>
-                                    {{ content.title }}
-                                </h2>
-
-                                <p>
-                                    {{ content.description }}
-                                </p>
-
-                                <p>
-                                    <strong>Type:</strong>
-                                    {{ content.get_content_type_display }}
-                                </p>
-
-                                <p>
-                                    <strong>Difficulty:</strong>
-                                    {{ content.difficulty }}
-                                </p>
-
-
-                               {% if content.content_type == 'video' and content.content_file %}
-
-    <div
-        id="video-{{ content.id }}"
-        class="video-container"
-    >
-
-        <video
-            id="video-player-{{ content.id }}"
-            controls
-            preload="metadata"
-            width="100%"
-        >
-            <source
-                src="{{ content.content_file.url }}"
-                type="video/mp4"
-            >
-
-            Your browser does not support the video element.
-
-        </video>
+        <p>
+            Learning materials for this topic.
+        </p>
 
     </div>
 
-{% elif content.content_type == 'pdf' and content.content_file %} 
-    <a 
-        id="pdf-link-{{ content.id }}"
-        href="{{ content.content_file.url }}" 
-        target="_blank" 
-        class="subject-button" 
-    > 
-        📄 Open PDF 
-    </a>
-
-{% elif content.content_type == 'article' and content.content_file %}
-
-    <a
-        href="{{ content.content_file.url }}"
-        target="_blank"
-        class="subject-button"
-    >
-        📖 Read Article
-    </a>
-   
-{% endif %}
-<br>
-
-
-<div class="content-actions">
-
-    <a 
-        href="{% url 'generate_ai_notes' content.id %}" 
-        class="notes-button"
-    >
-        🤖 Generate AI Study Notes
-    </a>
-
-    <a 
-        href="{% url 'generate_ai_quiz' content.id %}" 
-        class="quiz-button"
-    >
-        🧠 Generate AI Quiz
-    </a>
+    <div class="user-info">
+        {{ request.user.username }}
+    </div>
 
 </div>
-{% if request.GET.quiz %}
 
-    <div class="review-quiz-action">
 
-        <a href="{% url 'retake_quiz' request.GET.quiz %}" class="retake-quiz-btn">
-    📝 Practice Same Quiz 
-</a>
+<section class="subjects-section">
+
+    <div class="section-heading">
+
+        <h2>Learning Content</h2>
+
+        <p>
+            Study the available materials below.
+        </p>
+
     </div>
 
-{% endif %}
+
+    {% if contents %}
+
+        <div class="subjects-grid">
+
+            {% for content in contents %}
+
+                <div class="subject-card content-card">
+
+                    <h2>
+                        {{ content.title }}
+                    </h2>
+
+                    <p>
+                        {{ content.description }}
+                    </p>
+
+                    <p>
+                        <strong>Type:</strong>
+                        {{ content.get_content_type_display }}
+                    </p>
+
+                    <p>
+                        <strong>Difficulty:</strong>
+                        {{ content.difficulty }}
+                    </p>
 
 
+                    <!-- VIDEO -->
 
-                            </div>
+                    {% if content.content_type == 'video' and content.content_file %}
 
-                        {% endfor %}
+                        <div
+                            id="video-{{ content.id }}"
+                            class="video-container"
+                        >
+
+                            <video
+                                id="video-player-{{ content.id }}"
+                                controls
+                                preload="metadata"
+                                width="100%"
+                            >
+
+                                <source
+                                    src="{{ content.content_file.url }}"
+                                    type="video/mp4"
+                                >
+
+                                Your browser does not support the video element.
+
+                            </video>
+
+                        </div>
+
+
+                    <!-- PDF -->
+
+                    {% elif content.content_type == 'pdf' and content.content_file %}
+
+                        <a
+                            id="pdf-link-{{ content.id }}"
+                            href="{{ content.content_file.url }}"
+                            target="_blank"
+                            class="subject-button"
+                        >
+                            📄 Open PDF
+                        </a>
+
+
+                    <!-- ARTICLE -->
+
+                    {% elif content.content_type == 'article' and content.content_file %}
+
+                        <a
+                            href="{{ content.content_file.url }}"
+                            target="_blank"
+                            class="subject-button"
+                        >
+                            📖 Read Article
+                        </a>
+
+                    {% endif %}
+
+
+                    <br>
+
+
+                    <!-- CONTENT ACTIONS -->
+
+                    <div class="content-actions">
+
+                        <a
+                            href="{% url 'generate_ai_notes' content.id %}"
+                            class="notes-button"
+                        >
+                            🤖 Generate AI Study Notes
+                        </a>
+
+                        <a
+                            href="{% url 'generate_ai_quiz' content.id %}"
+                            class="quiz-button"
+                        >
+                            🧠 Generate AI Quiz
+                        </a>
 
                     </div>
 
-                {% else %}
 
-                    <div class="empty-message">
+                    <!-- PRACTICE SAME QUIZ -->
 
-                        <p>
-                            No learning content is available
-                            for this topic yet.
-                        </p>
+                    {% if request.GET.quiz %}
 
-                    </div>
+                        <div class="review-quiz-action">
 
-                {% endif %}
+                            <a
+                                href="{% url 'retake_quiz' request.GET.quiz %}"
+                                class="retake-quiz-btn"
+                            >
+                                📝 Practice Same Quiz
+                            </a>
+
+                        </div>
+
+                    {% endif %}
 
 
-                <a
-                    href="{% url 'topics' topic.subject.id %}"
-                    class="back-button"
-                >
-                    ← Back to Topics
-                </a>
+                </div>
 
-            </section>
+            {% endfor %}
 
-        </main>
+        </div>
 
-    </div>
+    {% else %}
+
+        <div class="empty-message">
+
+            <p>
+                No learning content is available
+                for this topic yet.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- BACK TO TOPICS -->
+
+    <a
+        href="{% url 'topics' topic.subject.id %}"
+        class="back-button"
+    >
+        ← Back to Topics
+    </a>
+
+</section>
+
+
 <script>
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -249,28 +213,41 @@ document.addEventListener("DOMContentLoaded", function () {
     const quizId = params.get(
         "quiz"
     );
-        const pdfPage = parseInt(
+
+    const pdfPage = parseInt(
         params.get("page")
     );
+
+
+    /*
+     * PDF PAGE REVIEW
+     */
 
     if (
         !isNaN(pdfPage) &&
         pdfPage > 0 &&
         contentId
     ) {
+
         const pdfLink = document.getElementById(
             "pdf-link-" + contentId
         );
 
         if (pdfLink) {
+
             pdfLink.href =
                 pdfLink.href +
                 "#page=" +
                 pdfPage;
+
         }
+
     }
 
+
     /*
+     * VIDEO TIMESTAMP REVIEW
+     *
      * Only activate review mode when
      * a valid start time and content ID
      * are provided.
@@ -280,16 +257,23 @@ document.addEventListener("DOMContentLoaded", function () {
         isNaN(startTime) ||
         !contentId
     ) {
+
         return;
+
     }
+
 
     const video = document.getElementById(
         "video-player-" + contentId
     );
 
+
     if (!video) {
+
         return;
+
     }
+
 
     /*
      * Wait until video metadata is loaded.
@@ -318,6 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { once: true }
     );
 
+
     /*
      * If metadata is already loaded,
      * seek immediately.
@@ -343,6 +328,5 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 </script>
-</body>
 
-</html>
+{% endblock %}

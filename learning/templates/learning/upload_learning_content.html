@@ -1,217 +1,140 @@
-{% load static %}
+{% extends "learning/base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Upload Learning Content | LearnAI{% endblock %}
 
-<head>
+{% block content %}
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<header class="top-header">
 
-    <title>Upload Learning Content</title>
+    <div>
 
-    <link
-        rel="stylesheet"
-        href="{% static 'learning/css/style.css' %}"
-    >
+        <h1>
+            Upload Learning Material 📤
+        </h1>
 
-</head>
+        <p>
+            Upload a video or PDF to create AI-powered study material.
+        </p>
 
-<body>
+    </div>
 
-<div class="dashboard-container">
+    <div class="user-info">
+        <span>{{ user.username }}</span>
+    </div>
 
-    <!-- Sidebar -->
+</header>
 
-    <aside class="sidebar">
 
-        <div class="logo">
-            <h2>LearnAI</h2>
-            <p>Personalized Learning</p>
-        </div>
+<section class="upload-section">
 
-        <nav>
+    <div class="upload-card">
 
-            <a href="{% url 'dashboard' %}">
-                Dashboard
-            </a>
+        <div class="section-heading">
 
-            <a href="{% url 'subjects' %}">
-                Subjects
-            </a>
+            <h2>
+                Add Learning Content
+            </h2>
 
-            <a href="{% url 'learning_content_list' %}" class="active">
-                Learning Content
-            </a>
-
-            <a href="#">
-                Quizzes
-            </a>
-
-            <a href="#">
-                Your Progress
-            </a>
-
-            <a href="#">
-                AI Recommendations
-            </a>
-
-        </nav>
-
-        <div class="sidebar-bottom">
-
-            <a
-                href="{% url 'logout' %}"
-                class="logout-btn"
-            >
-                Logout
-            </a>
+            <p>
+                Upload your own educational video or PDF.
+            </p>
 
         </div>
 
-    </aside>
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+        >
+
+            {% csrf_token %}
 
 
-    <!-- Main Content -->
+            {% if form.non_field_errors %}
 
-    <main class="main-content">
-
-        <header class="top-header">
-
-            <div>
-
-                <h1>
-                    Upload Learning Material 📤
-                </h1>
-
-                <p>
-                    Upload a video or PDF to create AI-powered study material.
-                </p>
-
-            </div>
-
-            <div class="user-info">
-                <span>{{ user.username }}</span>
-            </div>
-
-        </header>
-
-
-        <section class="upload-section">
-
-            <div class="upload-card">
-
-                <div class="section-heading">
-
-                    <h2>
-                        Add Learning Content
-                    </h2>
-
-                    <p>
-                        Upload your own educational video or PDF.
-                    </p>
-
+                <div class="messages">
+                    {{ form.non_field_errors }}
                 </div>
 
-
-                <form
-                    method="POST"
-                    enctype="multipart/form-data"
-                >
-
-                    {% csrf_token %}
+            {% endif %}
 
 
-                    {% if form.non_field_errors %}
+            <div class="form-group">
 
-                        <div class="messages">
-                            {{ form.non_field_errors }}
-                        </div>
+                <label for="{{ form.topic.id_for_label }}">
+                    Topic
+                </label>
 
-                    {% endif %}
+                {{ form.topic }}
 
-
-                    <div class="form-group">
-
-                        <label for="{{ form.topic.id_for_label }}">
-                            Topic
-                        </label>
-
-                        {{ form.topic }}
-
-                        {{ form.topic.errors }}
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="{{ form.title.id_for_label }}">
-                            Title
-                        </label>
-
-                        {{ form.title }}
-
-                        {{ form.title.errors }}
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="{{ form.description.id_for_label }}">
-                            Description
-                        </label>
-
-                        {{ form.description }}
-
-                        {{ form.description.errors }}
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="{{ form.content_type.id_for_label }}">
-                            Content Type
-                        </label>
-
-                        {{ form.content_type }}
-
-                        {{ form.content_type.errors }}
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="{{ form.content_file.id_for_label }}">
-                            Select Video or PDF
-                        </label>
-
-                        {{ form.content_file }}
-
-                        {{ form.content_file.errors }}
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="upload-button"
-                    >
-                        Upload Material
-                    </button>
-
-                </form>
+                {{ form.topic.errors }}
 
             </div>
 
-        </section>
 
-    </main>
+            <div class="form-group">
 
-</div>
+                <label for="{{ form.title.id_for_label }}">
+                    Title
+                </label>
 
-</body>
-</html>
+                {{ form.title }}
+
+                {{ form.title.errors }}
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="{{ form.description.id_for_label }}">
+                    Description
+                </label>
+
+                {{ form.description }}
+
+                {{ form.description.errors }}
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="{{ form.content_type.id_for_label }}">
+                    Content Type
+                </label>
+
+                {{ form.content_type }}
+
+                {{ form.content_type.errors }}
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="{{ form.content_file.id_for_label }}">
+                    Select Video or PDF
+                </label>
+
+                {{ form.content_file }}
+
+                {{ form.content_file.errors }}
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="upload-button"
+            >
+                Upload Material
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}
