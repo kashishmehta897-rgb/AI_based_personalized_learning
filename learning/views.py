@@ -663,7 +663,7 @@ def find_pdf_page(pdf_path, question_text, options=None):
 # =================================================
 
 @login_required
-def generate_ai_notes(request, content_id):
+def generate_ai_notes(request, content_id, force_regenerate=False):
 
     content = LearningContent.objects.get(
         id=content_id
@@ -673,7 +673,7 @@ def generate_ai_notes(request, content_id):
     # STEP 1: If AI notes already exist, load them
     # -------------------------------------------------
 
-    if content.ai_notes:
+    if content.ai_notes and not force_regenerate:
 
         return render(
             request,
@@ -1006,6 +1006,14 @@ Generate the final study notes now.
             "ai_notes": ai_notes,
             "from_database": False
         }
+    )
+@login_required
+def regenerate_ai_notes(request, content_id):
+
+    return generate_ai_notes(
+        request,
+        content_id,
+        force_regenerate=True
     )
 
 

@@ -125,24 +125,56 @@
 
                     <!-- CONTENT ACTIONS -->
 
-                    <div class="content-actions">
+<div class="content-actions">
 
-                        <a
-                            href="{% url 'generate_ai_notes' content.id %}"
-                            class="notes-button"
-                        >
-                            🤖 Generate AI Study Notes
-                        </a>
+    {% if content.ai_notes %}
 
-                        <a
-                            href="{% url 'generate_ai_quiz' content.id %}"
-                            class="quiz-button"
-                        >
-                            🧠 Generate AI Quiz
-                        </a>
+        <!-- Notes already exist -->
 
-                    </div>
+                <button
+    type="button"
+    class="notes-button notes-button-disabled"
+    disabled
+    style="
+        background: #e5e7eb !important;
+        color: #9ca3af !important;
+        border: 1px solid #d1d5db !important;
+        cursor: not-allowed !important;
+        opacity: 0.65;
+    "
+>
+    🤖 Generate AI Study Notes
+</button>
 
+        <a
+            href="{% url 'regenerate_ai_notes' content.id %}"
+            class="notes-button"
+        >
+            🔄 Regenerate AI Study Notes
+        </a>
+
+    {% else %}
+
+        <!-- Notes do not exist yet -->
+
+        <a
+            href="{% url 'generate_ai_notes' content.id %}"
+            class="notes-button"
+        >
+            🤖 Generate AI Study Notes
+        </a>
+
+    {% endif %}
+
+
+    <a
+        href="{% url 'generate_ai_quiz' content.id %}"
+        class="quiz-button"
+    >
+        🧠 Generate AI Quiz
+    </a>
+
+</div>
 
                     <!-- PRACTICE SAME QUIZ -->
 

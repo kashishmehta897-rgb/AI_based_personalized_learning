@@ -1,180 +1,173 @@
-{% load static %}
+{% extends "learning/base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}My Progress | LearnAI{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
+{% block content %}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div class="progress-header">
 
-    <title>My Progress | LearnAI</title>
+    <div>
 
-    <link rel="stylesheet"
-          href="{% static 'learning/css/style.css' %}">
-</head>
+        <h1>📊 My Learning Progress</h1>
 
-<body>
+        <p>
+            Track your quiz performance and learning progress.
+        </p>
 
-<div class="dashboard-container">
+    </div>
 
-    <!-- Sidebar -->
-
-    <aside class="sidebar">
-
-        <div class="logo">
-            <h2>LearnAI</h2>
-            <p>Personalized Learning</p>
-        </div>
-
-        <nav>
-
-            <a href="{% url 'dashboard' %}">
-                Dashboard
-            </a>
-
-            <a href="{% url 'subjects' %}">
-                Subjects
-            </a>
-
-            <a href="{% url 'quiz_list' %}">
-                Quizzes
-            </a>
-
-            <a href="{% url 'student_progress' %}" class="active">
-                Progress
-            </a>
-
-        </nav>
-
-    </aside>
+</div>
 
 
-    <!-- Main Content -->
+<!-- Progress Statistics -->
 
-    <main class="main-content">
+<div class="progress-stats">
 
-        <div class="progress-header">
+    <div class="progress-stat-card">
 
-            <div>
-                <h1>📊 My Learning Progress</h1>
+        <div class="stat-icon">📝</div>
 
-                <p>
-                    Track your quiz performance and learning progress.
-                </p>
-            </div>
+        <div>
+
+            <span>Total Quizzes</span>
+
+            <h2>{{ total_quizzes }}</h2>
 
         </div>
 
-
-        <!-- Progress Statistics -->
-
-        <div class="progress-stats">
-
-            <div class="progress-stat-card">
-
-                <div class="stat-icon">📝</div>
-
-                <div>
-                    <span>Total Quizzes</span>
-
-                    <h2>{{ total_quizzes }}</h2>
-                </div>
-
-            </div>
+    </div>
 
 
-            <div class="progress-stat-card">
+    <div class="progress-stat-card">
 
-                <div class="stat-icon">📈</div>
+        <div class="stat-icon">📈</div>
 
-                <div>
-                    <span>Average Score</span>
+        <div>
 
-                    <h2>{{ average_score }}%</h2>
-                </div>
+            <span>Average Score</span>
 
-            </div>
-
-
-            <div class="progress-stat-card">
-
-                <div class="stat-icon">🏆</div>
-
-                <div>
-                    <span>Best Score</span>
-
-                    <h2>{{ best_score }}%</h2>
-                </div>
-
-            </div>
+            <h2>{{ average_score }}%</h2>
 
         </div>
 
+    </div>
 
-        <!-- Quiz History -->
 
-        <!-- Quiz History -->
+    <div class="progress-stat-card">
+
+        <div class="stat-icon">🏆</div>
+
+        <div>
+
+            <span>Best Score</span>
+
+            <h2>{{ best_score }}%</h2>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Quiz History -->
 
 <div class="quiz-history-section">
 
     <div class="quiz-history-header">
 
-    <div>
-        <h2>Quiz History</h2>
-        <p>Your previous quiz attempts and performance.</p>
+        <div>
+
+            <h2>Quiz History</h2>
+
+            <p>
+                Your previous quiz attempts and performance.
+            </p>
+
+        </div>
+
+
+        {% if quiz_attempts %}
+
+        <form method="POST"
+              action="{% url 'clear_progress_history' %}">
+
+            {% csrf_token %}
+
+            <button type="submit"
+                    class="clear-history-btn"
+                    onclick="return confirm('Are you sure you want to clear your quiz history?');">
+
+                🗑 Clear History
+
+            </button>
+
+        </form>
+
+        {% endif %}
+
     </div>
 
-    {% if quiz_attempts %}
-    <form method="POST"
-          action="{% url 'clear_progress_history' %}">
 
-        {% csrf_token %}
-
-        <button type="submit"
-                class="clear-history-btn"
-                onclick="return confirm('Are you sure you want to clear your quiz history?');">
-
-            🗑 Clear History
-
-        </button>
-
-    </form>
-    {% endif %}
-
-</div>
     <div class="table-container">
 
         <table class="progress-table">
 
             <thead>
+
                 <tr>
+
                     <th>Quiz</th>
+
                     <th>Score</th>
+
                     <th>Total Questions</th>
+
                     <th>Percentage</th>
+
                     <th>Date</th>
+
                 </tr>
+
             </thead>
+
 
             <tbody>
 
                 {% for attempt in quiz_attempts %}
 
                 <tr>
-                    <td>{{ attempt.quiz.title }}</td>
-                    <td>{{ attempt.score }}</td>
-                    <td>{{ attempt.total_questions }}</td>
-                    <td>{{ attempt.percentage }}%</td>
-                    <td>{{ attempt.created_at|date:"d M Y, H:i" }}</td>
+
+                    <td>
+                        {{ attempt.quiz.title }}
+                    </td>
+
+                    <td>
+                        {{ attempt.score }}
+                    </td>
+
+                    <td>
+                        {{ attempt.total_questions }}
+                    </td>
+
+                    <td>
+                        {{ attempt.percentage }}%
+                    </td>
+
+                    <td>
+                        {{ attempt.created_at|date:"d M Y, H:i" }}
+                    </td>
+
                 </tr>
 
                 {% empty %}
 
                 <tr>
+
                     <td colspan="5">
                         No quiz attempts yet.
                     </td>
+
                 </tr>
 
                 {% endfor %}
@@ -186,10 +179,5 @@
     </div>
 
 </div>
-    </main>
 
-</div>
-
-</body>
-
-</html>
+{% endblock %}

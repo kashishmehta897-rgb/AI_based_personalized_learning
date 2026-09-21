@@ -1247,3 +1247,63 @@ textarea.form-input {
 
 }
 
+/* =========================
+   AI NOTES GENERATE BUTTON
+   ========================= */
+
+.generate-notes-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 22px;
+
+    background: #111;
+    color: white;
+
+    text-decoration: none;
+    border-radius: 6px;
+
+    font-weight: 600;
+
+    transition: all 0.3s ease;
+}
+
+.generate-notes-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.20);
+}
+
+
+/* Button while notes are generating */
+
+.generate-notes-btn.generating {
+    opacity: 0.55;
+    cursor: not-allowed;
+
+    pointer-events: none;
+
+    box-shadow:
+        0 0 0 4px rgba(0, 0, 0, 0.06),
+        0 5px 18px rgba(0, 0, 0, 0.18);
+
+    filter: blur(0.3px);
+
+    transform: scale(0.98);
+}
+/* Disabled Generate AI Study Notes button */
+
+.notes-button-disabled {
+    background: #e5e7eb !important;
+    color: #9ca3af !important;
+    border-color: #d1d5db !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+/* Prevent hover styling on disabled button */
+
+.notes-button-disabled:hover {
+    background: #e5e7eb !important;
+    color: #9ca3af !important;
+    border-color: #d1d5db !important;
+    transform: none;
+}

@@ -116,5 +116,10 @@ path(
     views.delete_topic,
     name="delete_topic"
 ),
+path(
+    'content/<int:content_id>/regenerate-notes/',
+    views.regenerate_ai_notes,
+    name='regenerate_ai_notes'
+),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

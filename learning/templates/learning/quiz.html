@@ -1,65 +1,9 @@
-{% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% extends "learning/base.html" %}
 
-<head>
+{% block title %}AI Quiz | {{ content.title }}{% endblock %}
 
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>AI Quiz | {{ content.title }}</title>
-
-    <link
-        rel="stylesheet"
-        href="{% static 'learning/css/style.css' %}"
-    >
-
-</head>
-
-<body>
-
-<div class="dashboard-container">
-
-    <!-- SIDEBAR -->
-
-    <aside class="sidebar">
-
-        <div class="logo">
-
-            <h2>AI Learning</h2>
-
-            <p>Personalized Learning System</p>
-
-        </div>
-
-        <nav>
-
-            <a href="{% url 'dashboard' %}">
-                Dashboard
-            </a>
-
-            <a href="{% url 'subjects' %}" class="active">
-                Subjects
-            </a>
-
-        </nav>
-
-        <div class="sidebar-bottom">
-
-            <a href="{% url 'logout' %}" class="logout-btn">
-                Logout
-            </a>
-
-        </div>
-
-    </aside>
-
-
-    <!-- MAIN CONTENT -->
-
-    <main class="main-content">
+{% block content %}
 
         <div class="top-header">
 
@@ -195,10 +139,4 @@
 
         </section>
 
-    </main>
-
-</div>
-
-</body>
-
-</html>
+{% endblock %}
