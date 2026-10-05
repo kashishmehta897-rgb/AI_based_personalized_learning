@@ -132,26 +132,26 @@
         <!-- Notes already exist -->
 
                 <button
-    type="button"
-    class="notes-button notes-button-disabled"
-    disabled
-    style="
-        background: #e5e7eb !important;
-        color: #9ca3af !important;
-        border: 1px solid #d1d5db !important;
-        cursor: not-allowed !important;
-        opacity: 0.65;
-    "
->
-    🤖 Generate AI Study Notes
-</button>
+                type="button"
+                class="notes-button notes-button-disabled"
+                disabled
+                style="
+                background: #e5e7eb !important;
+                color: #9ca3af !important;
+                border: 1px solid #d1d5db !important;
+                cursor: not-allowed !important;
+                opacity: 0.65;
+                "
+                >
+                🤖 Generate AI Study Notes
+                </button>
 
-        <a
+            <a
             href="{% url 'regenerate_ai_notes' content.id %}"
             class="notes-button"
-        >
+            >
             🔄 Regenerate AI Study Notes
-        </a>
+            </a>
 
     {% else %}
 
