@@ -1,0 +1,74 @@
+{% extends "learning/base.html" %}
+
+{% block title %}AI Recommendations | LearnAI{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>AI Recommendations</h1>
+    <p>Personalized recommendations based on your quiz performance.</p>
+</div>
+
+{% if not has_attempts %}
+
+<div class="content-card">
+    <h2>No Recommendations Yet</h2>
+
+    <p>
+        Complete a quiz to receive personalized learning recommendations.
+    </p>
+
+    <a href="{% url 'quiz_list' %}" class="upload-button">
+        Take a Quiz
+    </a>
+</div>
+
+{% elif recommendations %}
+
+<div class="recommendations-grid">
+
+    {% for recommendation in recommendations %}
+
+    <div class="content-card">
+
+        <div class="recommendation-header">
+            <h2>{{ recommendation.topic.name }}</h2>
+
+            <span class="priority {{ recommendation.priority|lower }}">
+                {{ recommendation.priority }} Priority
+            </span>
+        </div>
+
+        <p>
+            {{ recommendation.reason }}
+        </p>
+
+        <a
+            href="{% url 'learning_content' recommendation.topic.id %}"
+            class="upload-button"
+        >
+            Review Topic
+        </a>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="content-card">
+
+    <h2>You're Doing Great!</h2>
+
+    <p>
+        No weak topics were detected from your current quiz performance.
+        Keep learning and attempting quizzes to improve your progress.
+    </p>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

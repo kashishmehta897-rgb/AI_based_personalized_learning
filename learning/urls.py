@@ -47,4 +47,9 @@ path(
     views.quiz_list,
     name='quiz_list'
 ),
+path(
+    'recommendations/',
+    views.ai_recommendations,
+    name='ai_recommendations'
+),
 ]

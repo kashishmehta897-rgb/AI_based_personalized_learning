@@ -1,5 +1,5 @@
 from urllib import request
-from .models import QuizAttempt, StudentProfile, Subject, Topic, LearningContent
+from .models import QuizAttempt, StudentProfile, Subject, Topic, LearningContent, QuizAttempt,Recommendation
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -2279,3 +2279,137 @@ def delete_topic(request, topic_id):
         )
 
     return redirect("subjects")
+
+# =================================================
+# AI RECOMMENDATIONS
+# =================================================
+
+@login_required
+def ai_recommendations(request):
+
+    student = request.user.studentprofile
+
+    # -------------------------------------------------
+    # Get student's quiz attempts
+    # -------------------------------------------------
+
+    attempts = QuizAttempt.objects.filter(
+        student=student
+    ).select_related(
+        "quiz__topic__subject"
+    ).order_by(
+        "-completed_at"
+    )
+
+    # -------------------------------------------------
+    # No quiz attempts yet
+    # -------------------------------------------------
+
+    if not attempts.exists():
+
+        return render(
+            request,
+            "learning/ai_recommendations.html",
+            {
+                "recommendations": [],
+                "has_attempts": False
+            }
+        )
+
+    # -------------------------------------------------
+    # Find weak topics
+    # -------------------------------------------------
+
+    topic_performance = {}
+
+    for attempt in attempts:
+
+        topic = attempt.quiz.topic
+
+        if topic.id not in topic_performance:
+
+            topic_performance[topic.id] = {
+                "topic": topic,
+                "scores": []
+            }
+
+        if attempt.total_questions > 0:
+
+            percentage = round(
+                (
+                    attempt.score
+                    / attempt.total_questions
+                ) * 100
+            )
+
+            topic_performance[
+                topic.id
+            ]["scores"].append(
+                percentage
+            )
+
+    # -------------------------------------------------
+    # Create recommendations for weak topics
+    # -------------------------------------------------
+
+    recommendations = []
+
+    for data in topic_performance.values():
+
+        topic = data["topic"]
+        scores = data["scores"]
+
+        if not scores:
+            continue
+
+        average_score = round(
+            sum(scores) / len(scores)
+        )
+
+        # Only recommend topics below 70%
+        if average_score < 70:
+
+            if average_score < 40:
+                priority = "High"
+
+            elif average_score < 60:
+                priority = "Medium"
+
+            else:
+                priority = "Low"
+
+            recommendation, created = (
+                Recommendation.objects.get_or_create(
+                    student=student,
+                    topic=topic,
+                    is_completed=False,
+                    defaults={
+                        "reason": (
+                            f"Your average quiz score "
+                            f"for {topic.name} is "
+                            f"{average_score}%. "
+                            f"Review the learning "
+                            f"material for this topic "
+                            f"and attempt the quiz again."
+                        ),
+                        "priority": priority
+                    }
+                )
+            )
+
+            recommendations.append(
+                recommendation
+            )
+
+    # -------------------------------------------------
+    # Display recommendations
+    # -------------------------------------------------
+
+    return render(
+        request,
+        "learning/ai_recommendations.html",
+        {
+            "recommendations": recommendations,
+            "has_attempts": True
+        }
+    )

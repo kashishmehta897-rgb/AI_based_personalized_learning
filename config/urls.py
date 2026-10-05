@@ -121,5 +121,10 @@ path(
     views.regenerate_ai_notes,
     name='regenerate_ai_notes'
 ),
+path(
+    'recommendations/',
+    views.ai_recommendations,
+    name='ai_recommendations'
+),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
